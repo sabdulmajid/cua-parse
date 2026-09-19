@@ -65,7 +65,7 @@ export function htmlToText(html: string): string {
 export function validateReferenceUrl(value: string | null): string | null {
   if (value === null) return null;
   const url = new URL(value);
-  const hostname = url.hostname.toLowerCase();
+  const hostname = url.hostname.toLowerCase().replace(/\.+$/, "");
   if (
     !["https:", "http:"].includes(url.protocol) ||
     url.username ||
@@ -84,7 +84,23 @@ export function validateReferenceUrl(value: string | null): string | null {
       "Imported source links must be public HTTP(S) domain references without credentials or custom ports.",
     );
   }
+  url.hostname = hostname;
   return url.href;
+}
+
+/** Stable identity and source payload must agree; repeated observations may have a new collection time. */
+export function sameSourceRecord(left: RawRecord, right: RawRecord): boolean {
+  return (
+    left.id === right.id &&
+    left.source === right.source &&
+    left.provenance === right.provenance &&
+    left.text === right.text &&
+    left.threadId === right.threadId &&
+    left.threadTitle === right.threadTitle &&
+    left.parentId === right.parentId &&
+    left.url === right.url &&
+    left.publishedAt === right.publishedAt
+  );
 }
 
 function bounded(value: number, cap: number, name: string) {
@@ -314,28 +330,26 @@ async function collectHackerNews(
     for (const { task, item } of fetched) {
       if (!item) continue;
       const originalUrl = `https://news.ycombinator.com/item?id=${task.id}`;
-      if (
-        item.id !== task.id ||
-        item.deleted ||
-        item.dead ||
-        !["story", "comment"].includes(item.type)
-      ) {
+      if (item.id !== task.id || !["story", "comment"].includes(item.type)) {
         emit({
           query: `HN item ${task.id}`,
           url: originalUrl,
           status: "skipped",
           count: 0,
-          message: "Deleted, dead, unsupported, or mismatched item.",
+          message: "Unsupported or mismatched item.",
         });
         continue;
       }
-      if (task.id === task.threadId)
+      const removed = item.deleted || item.dead;
+      if (task.id === task.threadId && !removed)
         titles.set(
           task.threadId,
           htmlToText(item.title ?? task.title).slice(0, 500),
         );
       const title = titles.get(task.threadId) ?? task.title;
-      const text = htmlToText(item.text ?? "");
+      // Do not retain removed text or titles. Its valid children can still be
+      // collected within the same thread, request budget, and source allowlist.
+      const text = removed ? "" : htmlToText(item.text ?? "");
       let count = 0;
       if (text) {
         const record = rawRecordSchema.safeParse({
@@ -366,7 +380,9 @@ async function collectHackerNews(
         count,
         message: count
           ? "Original HN API text; HTML entities decoded."
-          : "No usable text in this item.",
+          : removed
+            ? "Deleted or dead original omitted; valid descendants remain eligible."
+            : "No usable text in this item.",
       });
       const queue = queues[threadIds.indexOf(task.threadId)]!;
       if ((item.kids?.length ?? 0) > 150) omittedReplies = true;
@@ -454,18 +470,21 @@ const adapters: Record<StartInput["mode"], SourceAdapter> = {
         );
       if (input.records.length > bounded(options.maxItems, 150, "maxItems"))
         throw new Error("Import exceeds the configured item cap.");
-      const ids = new Map<string, string>();
+      const ids = new Map<string, RawRecord>();
       const records = input.records.map((value) => {
         const record = rawRecordSchema.parse(value);
         if (record.source !== "import" || record.provenance !== "imported")
           throw new Error(
             "Imported records must use source=import and provenance=imported.",
           );
+        const validated = { ...record, url: validateReferenceUrl(record.url) };
         const previous = ids.get(record.id);
-        if (previous !== undefined && previous !== record.text)
-          throw new Error("An imported record ID refers to conflicting texts.");
-        ids.set(record.id, record.text);
-        return { ...record, url: validateReferenceUrl(record.url) };
+        if (previous && !sameSourceRecord(previous, validated))
+          throw new Error(
+            "An imported record ID refers to conflicting content or metadata.",
+          );
+        ids.set(record.id, validated);
+        return validated;
       });
       const attempt: SourceAttempt = {
         query: "Authorized JSON import",

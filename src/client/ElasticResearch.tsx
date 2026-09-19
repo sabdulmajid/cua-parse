@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
   ChevronDown,
@@ -12,6 +12,7 @@ import {
 import type {
   ElasticAnswer,
   ElasticComment,
+  ElasticProductsResponse,
   ElasticQueryInput,
   ElasticScope,
 } from "../shared/contracts";
@@ -136,6 +137,11 @@ export default function ElasticResearch({
   onContentChange: (hasContent: boolean) => void;
 }) {
   const [prompt, setPrompt] = useState("");
+  const [products, setProducts] = useState<string[]>([]);
+  const [product, setProduct] = useState("");
+  const [loadingProducts, setLoadingProducts] = useState(false);
+  const [productsError, setProductsError] = useState("");
+  const [catalogAttempt, setCatalogAttempt] = useState(0);
   const [question, setQuestion] = useState("");
   const [scope, setScope] = useState<ElasticScope>(fullScope);
   const [answer, setAnswer] = useState<ElasticAnswer | null>(null);
@@ -147,7 +153,104 @@ export default function ElasticResearch({
   const generation = useRef(0);
   const controller = useRef<AbortController | null>(null);
   const latestQuestion = useRef("");
+  const selectedProduct = useRef("");
+  const lastRequest = useRef<ElasticQueryInput | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const changeProduct = useCallback(
+    (next: string) => {
+      generation.current++;
+      controller.current?.abort();
+      controller.current = null;
+      if (timer.current) clearTimeout(timer.current);
+      const previousQuestion = latestQuestion.current;
+      latestQuestion.current = "";
+      lastRequest.current = null;
+      selectedProduct.current = next;
+      setProduct(next);
+      setPrompt((draft) => draft || previousQuestion);
+      setQuestion("");
+      setScope(fullScope());
+      setAnswer(null);
+      setError("");
+      setCancelled(false);
+      setBusy(false);
+      onContentChange(false);
+    },
+    [onContentChange],
+  );
+
+  useEffect(() => {
+    if (!csrfToken || !available) {
+      setProducts([]);
+      setLoadingProducts(false);
+      setProductsError("");
+      if (selectedProduct.current) changeProduct("");
+      return;
+    }
+    const abort = new AbortController();
+    let active = true;
+    let timedOut = false;
+    setLoadingProducts(true);
+    setProductsError("");
+    const timeout = setTimeout(() => {
+      timedOut = true;
+      abort.abort();
+    }, 15000);
+    void (async () => {
+      try {
+        const response = await fetch("/api/elastic/products", {
+          credentials: "same-origin",
+          signal: abort.signal,
+        });
+        const result =
+          (await response.json()) as Partial<ElasticProductsResponse> & {
+            error?: string;
+          };
+        if (!active) return;
+        if (!response.ok)
+          throw new Error(
+            result.error || "The product list could not be loaded.",
+          );
+        if (
+          !Array.isArray(result.products) ||
+          result.products.some(
+            (item) => typeof item !== "string" || !item.trim(),
+          )
+        )
+          throw new Error("The server returned an invalid product list.");
+        const choices = [...new Set(result.products)];
+        if (!choices.length)
+          throw new Error("No products were found in the uploaded comments.");
+        setProducts(choices);
+        const next = choices.includes(selectedProduct.current)
+          ? selectedProduct.current
+          : choices.includes("Microsoft Teams")
+            ? "Microsoft Teams"
+            : choices[0];
+        if (next !== selectedProduct.current) changeProduct(next);
+      } catch (failure) {
+        if (!active) return;
+        setProducts([]);
+        changeProduct("");
+        setProductsError(
+          timedOut
+            ? "The product list did not load in time. Retry to choose a product."
+            : failure instanceof Error
+              ? failure.message
+              : "The product list could not be loaded.",
+        );
+      } finally {
+        clearTimeout(timeout);
+        if (active) setLoadingProducts(false);
+      }
+    })();
+    return () => {
+      active = false;
+      clearTimeout(timeout);
+      abort.abort();
+    };
+  }, [available, csrfToken, catalogAttempt, changeProduct]);
 
   useEffect(() => {
     return () => {
@@ -161,19 +264,35 @@ export default function ElasticResearch({
     text: string,
     nextScope: ElasticScope,
     clearDraft = false,
+    retryBody?: ElasticQueryInput,
   ) => {
     const cleanQuestion = text.trim();
-    if (cleanQuestion.length < 3 || !csrfToken || !available) return;
+    if (
+      cleanQuestion.length < 3 ||
+      !csrfToken ||
+      !available ||
+      loadingProducts ||
+      !product ||
+      !products.includes(product) ||
+      product !== selectedProduct.current ||
+      (retryBody && retryBody.product !== product)
+    )
+      return;
     const revision = ++generation.current;
     controller.current?.abort();
     if (timer.current) clearTimeout(timer.current);
     const abort = new AbortController();
     controller.current = abort;
-    const body: ElasticQueryInput = {
+    const body: ElasticQueryInput = retryBody ?? {
+      product,
       question: cleanQuestion,
-      scope: nextScope,
+      scope: {
+        ...nextScope,
+        excludedVideoIds: [...nextScope.excludedVideoIds],
+      },
       requestId: crypto.randomUUID(),
     };
+    lastRequest.current = body;
     latestQuestion.current = cleanQuestion;
     setQuestion(cleanQuestion);
     setScope(nextScope);
@@ -211,6 +330,14 @@ export default function ElasticResearch({
         );
       }
       if (
+        result.product !== body.product ||
+        !Array.isArray(result.examples) ||
+        result.examples.some((comment) => comment.product !== body.product)
+      )
+        throw new Error(
+          "The response did not match the selected product. Please retry.",
+        );
+      if (
         result.requestId !== body.requestId ||
         result.question !== cleanQuestion ||
         result.scope.from !== nextScope.from ||
@@ -242,6 +369,21 @@ export default function ElasticResearch({
     }
   };
 
+  const retry = () => {
+    const body = lastRequest.current;
+    if (
+      !body ||
+      busy ||
+      body.product !== selectedProduct.current ||
+      body.question !== latestQuestion.current ||
+      JSON.stringify(body.scope) !== JSON.stringify(scope)
+    )
+      return;
+    // Replay the exact submitted operation. The server may already have cached
+    // its answer even when the browser did not receive the response.
+    void ask(body.question, body.scope, false, body);
+  };
+
   const cancel = () => {
     generation.current++;
     controller.current?.abort();
@@ -260,6 +402,42 @@ export default function ElasticResearch({
 
   return (
     <div className="elastic-workspace">
+      <div className="elastic-product-choice">
+        <label htmlFor="elastic-product">Product</label>
+        <select
+          id="elastic-product"
+          value={product}
+          disabled={
+            loadingProducts || !products.length || !csrfToken || !available
+          }
+          onChange={(event) => changeProduct(event.target.value)}
+        >
+          {!product && <option value="">Choose a product</option>}
+          {products.map((item) => (
+            <option key={item} value={item}>
+              {item}
+            </option>
+          ))}
+        </select>
+      </div>
+      {loadingProducts && (
+        <p className="elastic-scope-note" role="status">
+          Loading products…
+        </p>
+      )}
+      {productsError && (
+        <div className="elastic-catalog-error">
+          <p className="availability-note" role="alert">
+            {productsError}
+          </p>
+          <button
+            className="text-button"
+            onClick={() => setCatalogAttempt((value) => value + 1)}
+          >
+            Retry products
+          </button>
+        </div>
+      )}
       {question && (
         <div className="elastic-prompt-history">
           <article className="message turn user">
@@ -302,7 +480,12 @@ export default function ElasticResearch({
             type="submit"
             aria-label="Send message"
             disabled={
-              prompt.trim().length < 3 || busy || !csrfToken || !available
+              prompt.trim().length < 3 ||
+              busy ||
+              !csrfToken ||
+              !available ||
+              loadingProducts ||
+              !product
             }
           >
             {busy ? (
@@ -352,10 +535,7 @@ export default function ElasticResearch({
         </p>
       )}
       {(error || cancelled) && !busy && (
-        <button
-          className="text-button"
-          onClick={() => void ask(latestQuestion.current, scope)}
-        >
+        <button className="text-button" onClick={retry}>
           Retry question
         </button>
       )}
@@ -365,7 +545,9 @@ export default function ElasticResearch({
           aria-labelledby="elastic-answer-title"
         >
           <div className="findings-heading">
-            <span className="eyebrow">UPLOADED COMMENTS</span>
+            <span className="eyebrow">
+              UPLOADED COMMENTS · {answer.product}
+            </span>
             <span className="provenance-tag">YouTube · Elastic</span>
           </div>
           <h2 id="elastic-answer-title">What the comments say</h2>

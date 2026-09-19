@@ -529,3 +529,20 @@ describe("agent evidence boundary", () => {
     expect(result.limitations.at(-1)).toContain("2 unverified records");
   });
 });
+
+describe("source URL normalization", () => {
+  it.each([
+    "http://localhost./secret",
+    "https://host.internal./secret",
+    "http://127.0.0.1./secret",
+    "https://example.com:8443/path",
+    "https://example.com/\\path",
+  ])("rejects local or unsafe reference %s", (value) => {
+    expect(safeEvidenceUrl(value)).toBeNull();
+  });
+  it("normalizes a public trailing-dot hostname", () => {
+    expect(safeEvidenceUrl("https://example.com./source")).toBe(
+      "https://example.com/source",
+    );
+  });
+});

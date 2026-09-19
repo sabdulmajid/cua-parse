@@ -659,16 +659,16 @@ export class EvidenceStore {
     const input = querySchema.parse(rawInput);
     if (input.researchId !== job.id || job.state !== "ready")
       throw new Error("Research is not ready for this query.");
-    if (
-      input.filters.from &&
-      input.filters.to &&
-      input.filters.from > input.filters.to
-    )
-      throw new Error("The start date must not be after the end date.");
     const filters: Filters = {
       ...input.filters,
       excludedThreadIds: [...new Set(input.filters.excludedThreadIds)].sort(),
+      from: input.filters.from
+        ? new Date(input.filters.from).toISOString()
+        : null,
+      to: input.filters.to ? new Date(input.filters.to).toISOString() : null,
     };
+    if (filters.from && filters.to && filters.from > filters.to)
+      throw new Error("The start date must not be after the end date.");
     const snapshot = snapshotQuery(sessionId, job.id, job.evidenceVersion);
     const result = await this.client.search<EvidenceRecord, Analytics>({
       index: this.index,
@@ -689,6 +689,17 @@ export class EvidenceStore {
     )
       throw new Error(
         "Elasticsearch did not return an exact bounded snapshot count.",
+      );
+    if (
+      !Number.isSafeInteger(job.indexed) ||
+      job.indexed < 0 ||
+      total.value !== job.indexed
+    )
+      throw Object.assign(
+        new Error(
+          "Stored evidence no longer matches the completed research snapshot. Start a new research job.",
+        ),
+        { status: 409 },
       );
     const scoped = result.aggregations.scope;
     if (scoped.threads.sum_other_doc_count !== 0)

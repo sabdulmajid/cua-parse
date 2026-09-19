@@ -106,6 +106,7 @@ export default function App() {
   const filtersRef = useRef<Filters>({ ...emptyFilters });
   const lastQueryRef = useRef<QueryInput | null>(null);
   const generation = useRef(0);
+  const researchGeneration = useRef(0);
   const [busy, setBusy] = useState(false);
   const [querying, setQuerying] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -303,7 +304,9 @@ export default function App() {
 
   const startResearch = useCallback(
     async (input: StartInput, conversationId?: string) => {
-      const currentGeneration = ++generation.current;
+      const currentResearch = ++researchGeneration.current;
+      generation.current++;
+      setQuerying(false);
       cancelAnswer();
       setBusy(true);
       setError("");
@@ -313,8 +316,11 @@ export default function App() {
           input,
           conversationId,
         );
-        if (currentGeneration !== generation.current)
+        if (currentResearch !== researchGeneration.current)
           throw new Error("A newer research request is active.");
+        // Old research can finish and query while this start request is pending.
+        // Accept this latest start, then invalidate all of those old queries.
+        generation.current++;
         lastQueryRef.current = null;
         filtersRef.current = { ...emptyFilters, excludedThreadIds: [] };
         setFilters(filtersRef.current);
@@ -333,10 +339,11 @@ export default function App() {
         saveJob(next);
         return next;
       } catch (err) {
-        if (currentGeneration === generation.current) setError(errorText(err));
+        if (currentResearch === researchGeneration.current)
+          setError(errorText(err));
         throw err;
       } finally {
-        setBusy(false);
+        if (currentResearch === researchGeneration.current) setBusy(false);
       }
     },
     [api, saveJob, cancelAnswer],
@@ -889,6 +896,8 @@ export default function App() {
     }
   };
   const selectResearch = (next: ResearchJob) => {
+    researchGeneration.current++;
+    setBusy(false);
     cancelAnswer();
     generation.current++;
     lastQueryRef.current = null;
@@ -903,6 +912,8 @@ export default function App() {
     dialogRef.current?.close();
   };
   const newConversation = () => {
+    researchGeneration.current++;
+    setBusy(false);
     setElasticKey((key) => key + 1);
     setElasticHasContent(false);
     stopConversation();
@@ -1533,12 +1544,18 @@ export default function App() {
           </button>
         </div>
         <div className="dialog-content">
-          {packet && (
+          {ready && (
             <details className="detail-group" open>
               <summary>Scope & filters</summary>
               <p className="detail-help">
                 Filters change both the counts and retrieved evidence.
               </p>
+              {querying && (
+                <p className="detail-help" role="status">
+                  Updating evidence…
+                </p>
+              )}
+              {error && !querying && <p className="failure-note">{error}</p>}
               <div className="filter-fields">
                 <label>
                   Aspect

@@ -244,7 +244,7 @@ export function fixtureRecords(): RawRecord[] {
     source: "fixture",
     provenance: "synthetic",
   }));
-  records.push({ ...records[0]!, id: "fixture:exact-duplicate" });
+  records.push({ ...records[0]! });
   return records;
 }
 

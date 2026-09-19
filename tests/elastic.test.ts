@@ -6,7 +6,13 @@ import {
   scopeQuery,
   validateMapping,
 } from "../src/server/elastic.js";
-import { filtersSchema, type EvidenceRecord } from "../src/shared/contracts.js";
+import {
+  Aspects,
+  Sentiments,
+  filtersSchema,
+  type EvidenceRecord,
+  type ResearchJob,
+} from "../src/shared/contracts.js";
 
 const mock = vi.hoisted(() => ({
   bulk: vi.fn(),
@@ -15,6 +21,7 @@ const mock = vi.hoisted(() => ({
   deleteByQuery: vi.fn(),
   embed: vi.fn(),
   info: vi.fn(),
+  search: vi.fn(),
   indices: { exists: vi.fn(), create: vi.fn(), getMapping: vi.fn() },
 }));
 vi.mock("@elastic/elasticsearch", async (importOriginal) => {
@@ -59,10 +66,147 @@ const base: EvidenceRecord = {
 };
 beforeEach(() => {
   vi.clearAllMocks();
+  mock.search.mockReset();
   mock.create.mockResolvedValue({});
   mock.bulk.mockResolvedValue({
     errors: false,
     items: [{ create: { status: 201 } }],
+  });
+});
+
+const completedJob: ResearchJob = {
+  id: base.researchId,
+  product: "AcmeFlow",
+  question: "What works?",
+  mode: "fixture",
+  state: "ready",
+  createdAt: base.collectedAt,
+  updatedAt: base.collectedAt,
+  collected: 20,
+  analyzed: 20,
+  indexed: 20,
+  duplicates: 0,
+  attempts: [],
+  failures: [],
+  partial: false,
+  evidenceVersion: 1,
+};
+function emptySearchResponse() {
+  const hits = { hits: { hits: [] } };
+  return {
+    timed_out: false,
+    _shards: { failed: 0 },
+    hits: { total: { value: 0, relation: "eq" }, hits: [] },
+    aggregations: {
+      scope: {
+        doc_count: 0,
+        relevant: {
+          doc_count: 0,
+          labels: {
+            doc_count: 0,
+            selected: {
+              doc_count: 0,
+              aspects: {
+                buckets: Object.fromEntries(
+                  Aspects.map((aspect) => [
+                    aspect,
+                    {
+                      doc_count: 0,
+                      sentiments: {
+                        buckets: Object.fromEntries(
+                          Sentiments.map((sentiment) => [
+                            sentiment,
+                            { doc_count: 0 },
+                          ]),
+                        ),
+                      },
+                      originals: { doc_count: 0, example: hits },
+                    },
+                  ]),
+                ),
+              },
+            },
+          },
+        },
+        threads: { sum_other_doc_count: 0, buckets: [] },
+        provenance: { buckets: [] },
+        unlabeled: { doc_count: 0 },
+        missingDates: { doc_count: 0 },
+        embedded: { doc_count: 0 },
+      },
+    },
+  };
+}
+
+describe("completed snapshot consistency", () => {
+  const input = {
+    researchId: base.researchId,
+    question: "What works?",
+    filters: filtersSchema.parse({}),
+    requestId: "snapshot-check",
+    challenge: false,
+    challengeSentiment: "negative" as const,
+  };
+  it.each([0, 19, 21])(
+    "rejects %s stored records for a snapshot recorded as 20",
+    async (value) => {
+      const response = emptySearchResponse();
+      response.hits.total.value = value;
+      mock.search.mockResolvedValue(response);
+      await expect(
+        new EvidenceStore({ url: "http://127.0.0.1:9200" }).query(
+          base.sessionId,
+          completedJob,
+          input,
+        ),
+      ).rejects.toThrow("no longer matches");
+      expect(mock.search).toHaveBeenCalledTimes(1);
+    },
+  );
+  it("accepts a completed zero-record snapshot", async () => {
+    mock.search.mockResolvedValue(emptySearchResponse());
+    const packet = await new EvidenceStore({
+      url: "http://127.0.0.1:9200",
+    }).query(base.sessionId, { ...completedJob, indexed: 0 }, input);
+    expect(packet.metrics.collectedRecords).toBe(0);
+    expect(packet.evidence).toEqual([]);
+  });
+  it("normalizes equivalent date precision before ordering and scope hashing", async () => {
+    mock.search.mockResolvedValue(emptySearchResponse());
+    const store = new EvidenceStore({ url: "http://127.0.0.1:9200" });
+    const filtered = {
+      ...input,
+      filters: {
+        ...input.filters,
+        from: "2025-01-01T00:00:00Z",
+        to: "2025-01-01T00:00:00.000Z",
+      },
+    };
+    const packet = await store.query(
+      base.sessionId,
+      { ...completedJob, indexed: 0 },
+      filtered,
+    );
+    const equivalent = await store.query(
+      base.sessionId,
+      { ...completedJob, indexed: 0 },
+      {
+        ...filtered,
+        filters: { ...filtered.filters, from: filtered.filters.to },
+      },
+    );
+    expect(packet.filters.from).toBe("2025-01-01T00:00:00.000Z");
+    expect(packet.scopeVersion).toBe(equivalent.scopeVersion);
+    await expect(
+      store.query(
+        base.sessionId,
+        { ...completedJob, indexed: 0 },
+        {
+          ...filtered,
+          filters: { ...filtered.filters, from: "2025-01-02T00:00:00Z" },
+        },
+      ),
+    ).rejects.toThrow("start date");
   });
 });
 

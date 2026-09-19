@@ -1,5 +1,7 @@
 # Integrate without replacing another frontend
 
+For the full multi-team plan and role-specific agent tasks, read [AGENT_HANDOFF.md](AGENT_HANDOFF.md).
+
 The backend can serve an existing UI. The React workspace is a reference client. Keep the API contracts and session rules when building another frontend.
 
 ## Change boundaries
@@ -30,6 +32,7 @@ Use a same-origin `/api` proxy. `GET /api/session` establishes an HTTP-only cook
 | `POST /api/research/:id/cancel`          | Cancel an owned job.                                                         |
 | `POST /api/voice/session`                | Create a private text or voice connection lease.                             |
 | `POST /api/voice/bind`                   | Bind that lease to the conversation.                                         |
+| `GET /api/elastic/products`              | List product choices from the uploaded index without a model call.           |
 | `POST /api/elastic/query`                | Ask Elastic Agent Builder about the configured uploaded corpus.              |
 
 Import the schemas and types rather than copying request shapes. Research IDs alone do not grant access. Conversation requests also carry `X-Conversation-Id` after binding. Keep request IDs stable for retries of the same operation. Generate a new ID after changing the question or scope. Discard stale replies after a new job, conversation, or scope selection.
@@ -48,7 +51,7 @@ CUA_LOCAL_DIR=.local
 ELASTICSEARCH_INDEX=cua-parse-engineer-b-v1
 ```
 
-A checkout's relative `.local` directory is independent. Never point two API processes at the same SQLite database. Local Elasticsearch can be shared if each checkout has a distinct index. Only one shared Docker service needs to bind port 9200.
+A checkout's relative `.local` directory is independent. Session cookie names are derived from the configured app origin because browsers share cookies across ports. A valid legacy cookie is migrated without overwriting another app's cookie. Never point two API processes at the same SQLite database. Local Elasticsearch can be shared if each checkout has a distinct index. Only one shared Docker service needs to bind port 9200.
 
 For checks in that checkout:
 

@@ -32,6 +32,7 @@ const input = elasticQuerySchema.parse({
 const videoIds = ["L4j4oGbfRy4", "HOQdEsI4dgo", "NNui0axypdM", "yyRddSjm19I"];
 const records = Array.from({ length: 240 }, (_, i) => ({
   id: `comment_${i}`,
+  product: "Microsoft Teams",
   text: `Teams calls freeze when I share my screen. Original comment ${i}.`,
   video_id: videoIds[i < 200 ? 0 : i < 225 ? 1 : i < 237 ? 2 : 3],
   video_title: i < 200 ? "Teams discussion" : "Product experience",
@@ -52,7 +53,11 @@ function response(items = records, total = 240) {
         hits: { hits: [{ _source: { video_title: group[0].video_title } }] },
       },
       examples: {
-        hits: { hits: group.slice(0, 4).map((x) => ({ _source: x })) },
+        hits: {
+          hits: group
+            .slice(0, 4)
+            .map((x) => ({ _id: `elastic-hash-${x.id}`, _source: x })),
+        },
       },
     };
   });
@@ -154,6 +159,78 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 describe("read-only Elastic Cloud query", () => {
+  it("isolates Teams counts and originals from a mixed product upload", async () => {
+    const phones = Array.from({ length: 477 }, (_, i) => ({
+      ...records[0],
+      id: `phone_${i}`,
+      product: "iPhone 18",
+      text: "The iPhone battery drains during video calls.",
+      video_id: "phoneVideo1",
+      sentiment: "negative",
+      is_complaint: true,
+    }));
+    const upload = [...records, ...phones];
+    mocks.search.mockImplementation(async (request) => {
+      const filter = request.query.bool.filter.find(
+        (entry: { term?: { product?: string } }) => entry.term?.product,
+      );
+      expect(filter).toEqual({ term: { product: "Microsoft Teams" } });
+      return response(
+        upload.filter((record) => record.product === filter.term.product),
+        upload.length,
+      );
+    });
+    const result = await new ElasticCloud(options).query(input);
+    expect(result.product).toBe("Microsoft Teams");
+    expect(result.metrics).toMatchObject({
+      totalRecords: 717,
+      scopedRecords: 240,
+      complaints: 52,
+      negative: 52,
+      distinctVideos: 4,
+    });
+    expect(
+      result.examples.every((record) => record.product === input.product),
+    ).toBe(true);
+    expect(JSON.stringify(result.examples)).not.toContain("iPhone");
+    const fixed = JSON.parse(mocks.fetch.mock.calls[0][1].body);
+    expect(fixed.tool_params.query).toContain(
+      'WHERE product == "Microsoft Teams"',
+    );
+    const narrative = JSON.parse(mocks.fetch.mock.calls[1][1].body);
+    const context = JSON.parse(narrative.input);
+    expect(context.product).toBe("Microsoft Teams");
+    expect(context.comments).toHaveLength(240);
+    expect(JSON.stringify(context.comments)).not.toContain("iPhone");
+    expect(narrative.configuration_overrides.instructions).not.toContain(
+      "Teams",
+    );
+  });
+  it.each(["primary", "video example"])(
+    "rejects a different product in a %s hit before Agent Builder",
+    async (location) => {
+      const raw = response();
+      const hit =
+        location === "primary"
+          ? raw.hits.hits[0]
+          : raw.aggregations.videos.buckets[0].examples.hits.hits[0];
+      hit._source = { ...hit._source, product: "iPhone 18" };
+      mocks.search.mockResolvedValue(raw);
+      await expect(new ElasticCloud(options).query(input)).rejects.toThrow(
+        "outside the selected scope",
+      );
+      expect(mocks.fetch).not.toHaveBeenCalled();
+    },
+  );
+  it("uses the selected product as an escaped ES|QL value and an exact term", () => {
+    const product = 'Device "Pro" \\ edition';
+    expect(cloudStatsQuery(options.index, input.scope, product)).toContain(
+      `WHERE product == ${JSON.stringify(product)} | STATS`,
+    );
+    expect(cloudScopeQuery(input.scope, product)).toMatchObject({
+      bool: { filter: [{ term: { product } }] },
+    });
+  });
   it("counts all 240 records and calls fixed ESQL before tool-free Agent Builder", async () => {
     const result = await new ElasticCloud(options).query(input);
     expect(result.metrics).toMatchObject({
@@ -185,7 +262,9 @@ describe("read-only Elastic Cloud query", () => {
     const request = JSON.parse(mocks.fetch.mock.calls[0][1].body);
     expect(request).toEqual({
       tool_id: "platform.core.execute_esql",
-      tool_params: { query: cloudStatsQuery(options.index, input.scope) },
+      tool_params: {
+        query: cloudStatsQuery(options.index, input.scope, input.product),
+      },
     });
     const narrative = JSON.parse(mocks.fetch.mock.calls[1][1].body);
     expect(narrative.configuration_overrides).toMatchObject({
@@ -194,7 +273,7 @@ describe("read-only Elastic Cloud query", () => {
       tools: [],
     });
     expect(narrative.configuration_overrides.instructions).toContain(
-      "Microsoft Loop",
+      "requested product",
     );
     expect(narrative.configuration_overrides.instructions).toContain(
       "product field",
@@ -204,6 +283,83 @@ describe("read-only Elastic Cloud query", () => {
     expect(JSON.stringify(result)).not.toContain("provider-private-id");
     expect(JSON.stringify(result)).not.toContain("placeholder-secret");
     expect(result.limitations.join(" ")).toContain("supplied with the corpus");
+  });
+  it("normalizes supported Elasticsearch scalar category and boolean source forms", async () => {
+    const raw = response();
+    raw.hits.hits[200]._source = {
+      ...records[200],
+      issue_categories: "performance",
+      is_complaint: "true",
+    } as unknown as (typeof records)[number];
+    mocks.search.mockResolvedValue(raw);
+    const result = await new ElasticCloud(options).query(input);
+    expect(result.examples.find((x) => x.id === "comment_200")).toMatchObject({
+      categories: ["performance"],
+      isComplaint: true,
+    });
+  });
+  it.each([
+    { issue_categories: 123 },
+    { issue_categories: ["performance", 123] },
+    { is_complaint: "yes" },
+    { is_complaint: 1 },
+  ])(
+    "rejects unsupported stored label types instead of silently changing them: %j",
+    async (fields) => {
+      const raw = response();
+      raw.hits.hits[200]._source = {
+        ...records[200],
+        ...fields,
+      } as unknown as (typeof records)[number];
+      mocks.search.mockResolvedValue(raw);
+      await expect(new ElasticCloud(options).query(input)).rejects.toThrow(
+        "invalid corpus data",
+      );
+      expect(mocks.fetch).not.toHaveBeenCalled();
+    },
+  );
+  it("rejects duplicate native IDs in primary hits even when original content agrees", async () => {
+    mocks.search.mockResolvedValue(
+      response([records[0], { ...records[0] }], 2),
+    );
+    await expect(new ElasticCloud(options).query(input)).rejects.toThrow(
+      "duplicate comment identities",
+    );
+    expect(mocks.fetch).not.toHaveBeenCalled();
+  });
+  it("rejects different Elasticsearch documents with the same source ID across example groups", async () => {
+    const raw = response();
+    const example = raw.aggregations.videos.buckets[0].examples.hits.hits[0];
+    Object.assign(example, { _id: "different-elastic-document" });
+    mocks.search.mockResolvedValue(raw);
+    await expect(new ElasticCloud(options).query(input)).rejects.toThrow(
+      "duplicate comment identities",
+    );
+    expect(mocks.fetch).not.toHaveBeenCalled();
+  });
+  it("accepts the same indexed document repeated in primary and per-video hits", async () => {
+    const raw = response();
+    expect(raw.aggregations.videos.buckets[0].examples.hits.hits[0]._id).toBe(
+      raw.hits.hits[0]._id,
+    );
+    mocks.search.mockResolvedValue(raw);
+    const result = await new ElasticCloud(options).query(input);
+    expect(result.metrics.scopedRecords).toBe(240);
+    expect(new Set(result.examples.map((x) => x.id)).size).toBe(
+      result.examples.length,
+    );
+  });
+  it("distinguishes identical Elasticsearch IDs in different alias backing indices", async () => {
+    const raw = response();
+    Object.assign(raw.hits.hits[0], { _index: "corpus-v1" });
+    Object.assign(raw.aggregations.videos.buckets[0].examples.hits.hits[0], {
+      _index: "corpus-v2",
+    });
+    mocks.search.mockResolvedValue(raw);
+    await expect(new ElasticCloud(options).query(input)).rejects.toThrow(
+      "duplicate comment identities",
+    );
+    expect(mocks.fetch).not.toHaveBeenCalled();
   });
   it("applies identical exclusions and date limits to count and source reads", async () => {
     const selected = records.filter((x) => x.video_id !== videoIds[0]);
@@ -629,11 +785,14 @@ describe("read-only Elastic Cloud query", () => {
     expect(mocks.search).not.toHaveBeenCalled();
   });
   it("uses a fixed read query and keeps the user question out of ES|QL", () => {
-    expect(cloudStatsQuery(options.index, input.scope)).toBe(
-      "FROM youtube-product-comments | STATS records = COUNT(*) BY sentiment, is_complaint | SORT sentiment, is_complaint | LIMIT 100",
+    expect(cloudStatsQuery(options.index, input.scope, input.product)).toBe(
+      'FROM youtube-product-comments | WHERE product == "Microsoft Teams" | STATS records = COUNT(*) BY sentiment, is_complaint | SORT sentiment, is_complaint | LIMIT 100',
     );
-    expect(cloudScopeQuery(input.scope)).toEqual({
-      bool: { filter: [], must_not: [] },
+    expect(cloudScopeQuery(input.scope, input.product)).toEqual({
+      bool: {
+        filter: [{ term: { product: "Microsoft Teams" } }],
+        must_not: [],
+      },
     });
   });
   it("interleaves groups before a large video fills the context", () => {
@@ -649,5 +808,73 @@ describe("read-only Elastic Cloud query", () => {
     );
     source.push({ ...source[0], id: "small", videoId: videoIds[1] });
     expect(diverseCloudComments(source)[1].id).toBe("small");
+  });
+});
+
+describe("read-only Elastic product catalog", () => {
+  function catalog(products = ["Microsoft Teams", "iPhone 18"]) {
+    return {
+      timed_out: false,
+      _shards: { failed: 0 },
+      aggregations: {
+        products: {
+          sum_other_doc_count: 0,
+          doc_count_error_upper_bound: 0,
+          buckets: products.map((key) => ({ key, doc_count: 1 })),
+        },
+      },
+    };
+  }
+  it("returns exact product terms without an Agent Builder request", async () => {
+    mocks.search.mockResolvedValue(catalog());
+    expect(await new ElasticCloud(options).products()).toEqual({
+      products: ["Microsoft Teams", "iPhone 18"],
+    });
+    expect(mocks.search.mock.calls[0][0]).toEqual({
+      index: options.index,
+      size: 0,
+      allow_partial_search_results: false,
+      aggs: {
+        products: {
+          terms: { field: "product", size: 1000, order: { _key: "asc" } },
+        },
+      },
+    });
+    expect(mocks.fetch).not.toHaveBeenCalled();
+  });
+  it("allows an empty catalog", async () => {
+    mocks.search.mockResolvedValue(catalog([]));
+    expect(await new ElasticCloud(options).products()).toEqual({
+      products: [],
+    });
+    expect(mocks.fetch).not.toHaveBeenCalled();
+  });
+  it.each(["truncated", "inexact", "partial", "timeout", "blank product"])(
+    "rejects a %s catalog without hiding incomplete data",
+    async (mode) => {
+      const raw = catalog();
+      if (mode === "truncated")
+        raw.aggregations.products.sum_other_doc_count = 1;
+      if (mode === "inexact")
+        raw.aggregations.products.doc_count_error_upper_bound = 1;
+      if (mode === "partial") raw._shards.failed = 1;
+      if (mode === "timeout") raw.timed_out = true;
+      if (mode === "blank product")
+        raw.aggregations.products.buckets[0].key = " ";
+      mocks.search.mockResolvedValue(raw);
+      await expect(new ElasticCloud(options).products()).rejects.toMatchObject({
+        category: "provider",
+      });
+      expect(mocks.fetch).not.toHaveBeenCalled();
+    },
+  );
+  it("honors cancellation without reading or exposing the abort reason", async () => {
+    const controller = new AbortController();
+    controller.abort(new Error("private abort reason"));
+    await expect(
+      new ElasticCloud(options).products(controller.signal),
+    ).rejects.toMatchObject({ category: "timeout" });
+    expect(mocks.search).not.toHaveBeenCalled();
+    expect(mocks.fetch).not.toHaveBeenCalled();
   });
 });

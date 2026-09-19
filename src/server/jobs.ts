@@ -38,22 +38,24 @@ export class JobRunner {
     db.recover();
   }
   submit(session: string, input: StartInput) {
+    // A replay consumes no queue slot. Match the key and full input before
+    // capacity checks; equal question text does not identify the same operation.
+    const existing = this.db.findJobByIdempotency(session, input);
+    if (existing) return existing;
     if (this.queue.length >= 10)
-      throw new Error(
-        "Research queue is full. Try again after a job completes.",
+      throw Object.assign(
+        new Error("Research queue is full. Try again after a job completes."),
+        { status: 429 },
       );
     const active = this.db
       .listJobs(session)
       .filter((x) =>
         ["queued", "collecting", "analyzing", "indexing"].includes(x.state),
       );
-    if (
-      active.length >= 2 &&
-      !active.some(
-        (x) => x.product === input.product && x.question === input.question,
-      )
-    )
-      throw new Error("Two research jobs are already active.");
+    if (active.length >= 2)
+      throw Object.assign(new Error("Two research jobs are already active."), {
+        status: 429,
+      });
     const result = this.db.insertJob(session, input);
     if (result.created) {
       this.queue.push({ session, input, job: result.job });

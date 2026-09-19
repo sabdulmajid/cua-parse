@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import OpenAI from "openai";
 import { zodTextFormat } from "openai/helpers/zod";
 import { z } from "zod";
+import { sameSourceRecord } from "./collection.js";
 import {
   fixtureLabel,
   FIXTURE_PRODUCT,
@@ -276,24 +277,20 @@ export async function analyze(
     throw new Error("Fixture labels only describe AcmeFlow.");
   const failures: string[] = [];
   const unique: RawRecord[] = [];
-  const hashes = new Set<string>();
-  const ids = new Set<string>();
+  const originalsById = new Map<string, RawRecord>();
   let duplicates = 0;
   for (const value of input) {
     const record = rawRecordSchema.parse(value);
-    const hash = contentHash(record.text);
-    if (hashes.has(hash)) {
-      duplicates++;
+    const previous = originalsById.get(record.id);
+    if (previous) {
+      if (sameSourceRecord(previous, record)) duplicates++;
+      else
+        failures.push(
+          `Record ${record.id}: conflicting source content or metadata; conflicting occurrence excluded.`,
+        );
       continue;
     }
-    if (ids.has(record.id)) {
-      failures.push(
-        `Record ${record.id}: conflicting source ID; record excluded.`,
-      );
-      continue;
-    }
-    hashes.add(hash);
-    ids.add(record.id);
+    originalsById.set(record.id, record);
     unique.push(record);
   }
   const originals = new Map(unique.map((record) => [record.id, record]));

@@ -1,7 +1,13 @@
 /** Deterministic UI checks: real local API/Elasticsearch, synthetic records, no paid provider calls. */
 import { test, expect, type Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
-import type { EvidencePacket } from "../src/shared/contracts.js";
+import type {
+  EvidencePacket,
+  QueryInput,
+  RawRecord,
+  ResearchJob,
+  SessionResponse,
+} from "../src/shared/contracts.js";
 
 async function preventPaidWork(page: Page): Promise<string[]> {
   const blocked: string[] = [];
@@ -439,4 +445,325 @@ test("repeated analysis warnings use one main notice and remain inspectable in D
   await expect(failureRows.last()).toHaveText(failures[11]);
   await expect(failureRows.first()).toBeVisible();
   expect(blocked).toEqual([]);
+});
+
+test("an old job becoming ready cannot supersede a pending new research start", async ({
+  page,
+}) => {
+  const oldId = "11111111-1111-4111-8111-111111111111";
+  const newId = "22222222-2222-4222-8222-222222222222";
+  const oldMarker = "OLD RESEARCH MUST STAY REPLACED";
+  const newMarker = "The current import contains the requested evidence.";
+  const oldJob: ResearchJob = {
+    id: oldId,
+    product: "AcmeFlow",
+    question: "Old question",
+    mode: "fixture",
+    state: "collecting",
+    createdAt: "2026-09-19T00:00:00.000Z",
+    updatedAt: "2026-09-19T00:00:00.000Z",
+    collected: 0,
+    analyzed: 0,
+    indexed: 0,
+    duplicates: 0,
+    attempts: [],
+    failures: [],
+    partial: false,
+    evidenceVersion: 1,
+  };
+  const newJob: ResearchJob = {
+    ...oldJob,
+    id: newId,
+    product: "Current import",
+    question: "What does the new import say?",
+    mode: "import",
+    state: "ready",
+  };
+  const makeGate = () => {
+    let release: () => void = () => {};
+    const promise = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    return { promise, release };
+  };
+  const oldReady = makeGate(),
+    newStart = makeGate(),
+    oldQuery = makeGate();
+  let starts = 0,
+    oldQueryHeld = false,
+    oldQueryDelivered = false;
+  const blocked: string[] = [];
+  await page.route("**/api/**", async (route) => {
+    blocked.push(new URL(route.request().url()).pathname);
+    await route.fulfill({
+      status: 400,
+      json: { error: "Unexpected API call blocked by mocked race test." },
+    });
+  });
+  await page.routeWebSocket(/.*/, (socket) => {
+    blocked.push("provider WebSocket");
+    socket.close();
+  });
+  const session: SessionResponse = {
+    csrfToken: "mocked-start-race-csrf",
+    jobs: [],
+    providers: {},
+    voiceAvailable: false,
+    elasticAgentAvailable: false,
+  };
+  await page.route("**/api/session", (route) =>
+    route.fulfill({ json: session }),
+  );
+  await page.route("**/api/tools/start_research", async (route) => {
+    starts++;
+    if (starts === 1)
+      await route.fulfill({ status: 202, json: { job: oldJob } });
+    else {
+      expect(route.request().postDataJSON().mode).toBe("import");
+      await newStart.promise;
+      await route.fulfill({ status: 202, json: { job: newJob } });
+    }
+  });
+  await page.route("**/api/tools/get_research_status", async (route) => {
+    expect(route.request().postDataJSON().researchId).toBe(oldId);
+    await oldReady.promise;
+    await route.fulfill({ json: { job: { ...oldJob, state: "ready" } } });
+  });
+  await page.route("**/api/tools/query_feedback", async (route) => {
+    const input = route.request().postDataJSON() as QueryInput;
+    const packet: EvidencePacket = {
+      ...input,
+      snapshotVersion: 1,
+      scopeVersion: input.requestId,
+      retrievalMode: "bm25",
+      provenance: [input.researchId === oldId ? "synthetic" : "imported"],
+      metrics: {
+        collectedRecords: 1,
+        scopedRecords: 1,
+        relevantRecords: 1,
+        distinctThreads: 1,
+        aspectMentions: 0,
+        aspects: [],
+        threads: [],
+      },
+      findings: [],
+      evidence: [],
+      opposingEvidence: [],
+      limitations: ["Mocked regression data."],
+      spokenSummary: input.researchId === oldId ? oldMarker : newMarker,
+      generatedAt: "2026-09-19T00:00:00.000Z",
+    };
+    if (input.researchId === oldId) {
+      oldQueryHeld = true;
+      await oldQuery.promise;
+      try {
+        await route.fulfill({ json: { packet } });
+      } catch (error) {
+        if (!route.request().failure()) throw error;
+      } finally {
+        oldQueryDelivered = true;
+      }
+    } else await route.fulfill({ json: { packet } });
+  });
+  try {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Try demo", exact: true }).click();
+    await expect(page.locator(".research-progress")).toContainText(
+      "AcmeFlow · collecting",
+    );
+    await page
+      .getByRole("banner")
+      .getByRole("button", { name: "Details", exact: true })
+      .click();
+    await page.getByText("Import your data", { exact: true }).click();
+    const record: RawRecord = {
+      id: "import:one",
+      text: "The new import provides useful feedback.",
+      url: null,
+      threadId: "import:thread",
+      threadTitle: "Current import",
+      parentId: null,
+      publishedAt: null,
+      collectedAt: "2026-09-19T00:00:00.000Z",
+      source: "import",
+      provenance: "imported",
+    };
+    await page.getByLabel("Upload authorized JSON records").setInputFiles({
+      name: "race-fixture.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify([record])),
+    });
+    await page.getByLabel("Import product").fill(newJob.product);
+    await page.getByLabel("Import research question").fill(newJob.question);
+    await page
+      .getByRole("button", { name: "Research this import", exact: true })
+      .click();
+    await expect.poll(() => starts).toBe(2);
+    oldReady.release();
+    await expect.poll(() => oldQueryHeld).toBe(true);
+    newStart.release();
+    await expect(page.locator(".research-progress")).toContainText(
+      "Current import · research ready",
+    );
+    await expect(page.locator(".findings-card .conclusion")).toHaveText(
+      newMarker,
+    );
+    oldQuery.release();
+    await expect.poll(() => oldQueryDelivered).toBe(true);
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+        ),
+    );
+    await expect(page.getByText(oldMarker, { exact: true })).toHaveCount(0);
+    await expect(page.locator(".findings-card .conclusion")).toHaveText(
+      newMarker,
+    );
+    await expect(page.getByRole("alert")).toHaveCount(0);
+    expect(blocked).toEqual([]);
+  } finally {
+    oldReady.release();
+    newStart.release();
+    oldQuery.release();
+  }
+});
+
+test("a rejected date scope keeps controls editable and recovers on the same job", async ({
+  page,
+}) => {
+  const blocked = await preventPaidWork(page);
+  const latest = packets(page);
+  await page.goto("/");
+  await startDemo(page);
+  await expect.poll(() => latest()?.researchId).toBeTruthy();
+  const researchId = latest()!.researchId;
+  await details(page);
+  await page.getByLabel("To date", { exact: true }).fill("2025-01-01");
+  await expect
+    .poll(() => latest()?.filters.to)
+    .toBe("2025-01-01T23:59:59.999Z");
+  await page.getByLabel("From date", { exact: true }).fill("2026-01-01");
+  const dialog = page.getByRole("dialog", { name: "Details", exact: true });
+  await expect(dialog.locator(".failure-note")).toContainText(
+    "Start date must precede end date.",
+  );
+  await expect(page.getByLabel("From date", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("To date", { exact: true })).toBeVisible();
+  await page.getByLabel("To date", { exact: true }).fill("2027-01-01");
+  await expect
+    .poll(() => latest()?.filters.to)
+    .toBe("2027-01-01T23:59:59.999Z");
+  expect(latest()?.researchId).toBe(researchId);
+  expect(latest()?.filters.from).toBe("2026-01-01T00:00:00.000Z");
+  await expect(dialog.locator(".failure-note")).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "Close details", exact: true })
+    .click();
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  await expect(page.locator(".findings-card")).toBeVisible();
+  expect(blocked).toEqual([]);
+});
+
+test("a rejected new start clears the previous query state and allows scope recovery", async ({
+  page,
+}) => {
+  const blocked = await preventPaidWork(page);
+  const latest = packets(page);
+  await page.goto("/");
+  await startDemo(page);
+  await expect.poll(() => latest()?.researchId).toBeTruthy();
+  const original = latest()!;
+  let releaseQuery: () => void = () => {};
+  const queryGate = new Promise<void>((resolve) => {
+    releaseQuery = resolve;
+  });
+  let queryHeld = false;
+  let queryDelivered = false;
+  await page.route("**/api/tools/query_feedback", async (route) => {
+    const input = route.request().postDataJSON() as QueryInput;
+    if (input.filters.aspect !== "pricing") return route.fallback();
+    queryHeld = true;
+    await queryGate;
+    try {
+      await route.fulfill({
+        json: {
+          packet: {
+            ...original,
+            ...input,
+            scopeVersion: input.requestId,
+            spokenSummary: "This superseded query must not replace the error.",
+          },
+        },
+      });
+    } finally {
+      queryDelivered = true;
+    }
+  });
+  await page.route("**/api/tools/start_research", async (route) => {
+    expect(route.request().postDataJSON().mode).toBe("import");
+    await route.fulfill({
+      status: 429,
+      json: { error: "The research request limit has been reached." },
+    });
+  });
+  try {
+    await details(page);
+    await page.getByLabel("Filter by aspect").selectOption("pricing");
+    await expect.poll(() => queryHeld).toBe(true);
+    await expect(
+      page.getByText("Updating evidence…", { exact: true }),
+    ).toBeVisible();
+    await page.getByText("Import your data", { exact: true }).click();
+    const record: RawRecord = {
+      id: "import:rejected",
+      text: "The import cannot start because the research limit was reached.",
+      url: null,
+      threadId: "import:thread",
+      threadTitle: "Rejected import",
+      parentId: null,
+      publishedAt: null,
+      collectedAt: "2026-09-19T00:00:00.000Z",
+      source: "import",
+      provenance: "imported",
+    };
+    await page.getByLabel("Upload authorized JSON records").setInputFiles({
+      name: "rejected-import.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify([record])),
+    });
+    await page.getByLabel("Import product").fill("Rejected import");
+    await page
+      .getByRole("button", { name: "Research this import", exact: true })
+      .click();
+    await details(page);
+    const dialog = page.getByRole("dialog", { name: "Details", exact: true });
+    await expect(dialog.locator(".failure-note")).toHaveText(
+      "The research request limit has been reached.",
+    );
+    await expect(
+      page.getByText("Updating evidence…", { exact: true }),
+    ).toHaveCount(0);
+    releaseQuery();
+    await expect.poll(() => queryDelivered).toBe(true);
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+        ),
+    );
+    await expect(dialog.locator(".failure-note")).toHaveText(
+      "The research request limit has been reached.",
+    );
+    await page.getByLabel("Filter by aspect").selectOption("reliability");
+    await expect.poll(() => latest()?.filters.aspect).toBe("reliability");
+    expect(latest()?.researchId).toBe(original.researchId);
+    await expect(dialog.locator(".failure-note")).toHaveCount(0);
+    await expect(
+      page.getByText("Updating evidence…", { exact: true }),
+    ).toHaveCount(0);
+    expect(blocked).toEqual([]);
+  } finally {
+    releaseQuery();
+  }
 });

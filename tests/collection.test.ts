@@ -64,6 +64,11 @@ describe("source text and reference safety", () => {
     "https://user:password@example.com/x",
     "http://service.local/x",
     "http://localhost/x",
+    "http://localhost./x",
+    "https://service.local./x",
+    "https://service.internal./x",
+    "https://sub.localhost../x",
+    "http://192.168.1.1./x",
     "https://example.com:8000/x",
   ])("rejects unsafe imported link %s", (url) =>
     expect(() => validateReferenceUrl(url)).toThrow(),
@@ -73,6 +78,9 @@ describe("source text and reference safety", () => {
       "https://example.com/feedback/1",
     );
     expect(validateReferenceUrl(null)).toBeNull();
+    expect(validateReferenceUrl("https://example.com./feedback/1")).toBe(
+      "https://example.com/feedback/1",
+    );
   });
 });
 
@@ -139,6 +147,38 @@ describe("offline adapters", () => {
         { ...options(), maxItems: 1 },
       ),
     ).rejects.toThrow("item cap");
+  });
+  it.each([
+    { threadId: "other-thread" },
+    { threadTitle: "Another product" },
+    { parentId: "other-parent" },
+    { url: "https://example.org/other" },
+    { publishedAt: "2026-09-01T00:00:00.000Z" },
+  ])(
+    "rejects conflicting imported metadata for the same ID: %j",
+    async (change) => {
+      const record = imported();
+      await expect(
+        collect(
+          { ...input("import"), records: [record, { ...record, ...change }] },
+          options(),
+        ),
+      ).rejects.toThrow("conflicting content or metadata");
+    },
+  );
+  it("permits repeated imported observations with only a different collection time", async () => {
+    const record = imported();
+    const result = await collect(
+      {
+        ...input("import"),
+        records: [
+          record,
+          { ...record, collectedAt: "2026-09-20T00:00:00.000Z" },
+        ],
+      },
+      options(),
+    );
+    expect(result.records).toHaveLength(2);
   });
   it("supports a genuinely empty import", async () =>
     expect(
@@ -306,8 +346,7 @@ describe("bounded HN adapter with explicit mocked HTTP", () => {
           });
         const id = Number(value.pathname.match(/(\d+)\.json/)?.[1]);
         requested.push(id);
-        if (id === 100)
-          return json({ id, type: "story", dead: true, kids: [101] });
+        if (id === 100) return json({ id, type: "story", dead: true });
         if (id === 200) return json({ id, type: "story" });
         if (id === 300)
           return json({
@@ -334,6 +373,75 @@ describe("bounded HN adapter with explicit mocked HTTP", () => {
     expect(requested).not.toContain(101);
     expect(requested).toHaveLength(12);
     expect(result.failures).toEqual([]);
+  });
+  it.each(["deleted", "dead"])(
+    "traverses valid descendants while omitting a %s parent's text",
+    async (flag) => {
+      const requested: number[] = [];
+      const originals: Record<number, object> = {
+        100: {
+          id: 100,
+          type: "story",
+          title: "AcmeFlow feedback",
+          kids: [101],
+        },
+        101: {
+          id: 101,
+          type: "comment",
+          text: "REMOVED ORIGINAL MUST NOT BE RETAINED",
+          [flag]: true,
+          kids: [102],
+        },
+        102: {
+          id: 102,
+          type: "comment",
+          parent: 101,
+          text: "AcmeFlow freezes every morning.",
+          kids: [101],
+        },
+      };
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async (value: URL) => {
+          if (value.origin === "https://hn.algolia.com")
+            return json({ hits: [{ objectID: "100" }] });
+          expect(value.origin).toBe("https://hacker-news.firebaseio.com");
+          const id = Number(value.pathname.match(/(\d+)\.json/)?.[1]);
+          requested.push(id);
+          return json(originals[id]);
+        }),
+      );
+      const result = await collect(input("live"), {
+        ...options(),
+        maxItems: 1,
+        maxThreads: 1,
+      });
+      expect(requested).toEqual([100, 101, 102]);
+      expect(result.records).toHaveLength(1);
+      expect(result.records[0]).toMatchObject({
+        id: "hn:102",
+        parentId: "hn:101",
+        threadId: "hn:100",
+        threadTitle: "AcmeFlow feedback",
+      });
+      expect(JSON.stringify(result)).not.toContain("REMOVED ORIGINAL");
+      expect(result.failures).toEqual([]);
+    },
+  );
+  it("does not traverse IDs from a mismatched source item", async () => {
+    const requested: number[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (value: URL) => {
+        if (value.origin === "https://hn.algolia.com")
+          return json({ hits: [{ objectID: "100" }] });
+        requested.push(Number(value.pathname.match(/(\d+)\.json/)?.[1]));
+        return json({ id: 999, type: "story", deleted: true, kids: [101] });
+      }),
+    );
+    const result = await collect(input("live"), options());
+    expect(requested).toEqual([100]);
+    expect(result.records).toEqual([]);
   });
   it("does not spend all requests on a thread full of deleted replies", async () => {
     let itemRequests = 0;

@@ -26,6 +26,19 @@ describe("persistent job and session contracts", () => {
     expect(() =>
       db.insertJob(a.id, { ...input, question: "Changed request" }),
     ).toThrow(/Idempotency/);
+    expect(db.findJobByIdempotency(a.id, input)?.id).toBe(first.job.id);
+    expect(
+      db.findJobByIdempotency(a.id, {
+        ...input,
+        idempotencyKey: "never-created-key",
+      }),
+    ).toBeUndefined();
+    try {
+      db.findJobByIdempotency(a.id, { ...input, question: "Changed request" });
+      throw new Error("Expected conflict");
+    } catch (error) {
+      expect(error).toMatchObject({ status: 409 });
+    }
     db.close();
   });
   it("recovers interrupted jobs, preserving terminal jobs", () => {

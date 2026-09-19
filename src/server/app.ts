@@ -1,5 +1,5 @@
 import express from "express";
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import path from "node:path";
 import { existsSync } from "node:fs";
 import { z } from "zod";
@@ -117,29 +117,42 @@ export function createApp(config: Config) {
     next();
   });
   app.use(express.json({ limit: "3mb" }));
+  // Cookies are shared across ports. Give each app origin its own session name.
+  const sessionCookie = `cua_session_${createHash("sha256")
+    .update(new URL(config.APP_BASE_URL).origin)
+    .digest("hex")
+    .slice(0, 16)}`;
   const mac = (id: string) =>
     createHmac("sha256", config.APP_SESSION_SECRET).update(id).digest("hex");
+  const verifiedSessionId = (signed: string | undefined) => {
+    if (!signed) return undefined;
+    const [candidate, sig] = signed.split(".");
+    const expected = mac(candidate || "");
+    if (
+      sig &&
+      /^[a-f0-9]{64}$/.test(sig) &&
+      timingSafeEqual(Buffer.from(sig), Buffer.from(expected))
+    )
+      return candidate;
+    return undefined;
+  };
   app.use("/api", (req, res, next) => {
-    const signed = req.headers.cookie
-      ?.split(";")
-      .map((x) => x.trim())
-      .find((x) => x.startsWith("cua_session="))
-      ?.slice(12);
-    let id: string | undefined;
-    if (signed) {
-      const [candidate, sig] = signed.split(".");
-      const expected = mac(candidate || "");
-      if (
-        !!sig &&
-        /^[a-f0-9]{64}$/.test(sig) &&
-        timingSafeEqual(Buffer.from(sig), Buffer.from(expected))
-      )
-        id = candidate;
-    }
+    const cookies =
+      req.headers.cookie?.split(";").map((value) => value.trim()) ?? [];
+    const named = cookies.find((value) =>
+      value.startsWith(`${sessionCookie}=`),
+    );
+    // Migrate only this app's valid legacy cookie. Leave the shared legacy
+    // cookie intact so another app can independently migrate its own session.
+    const signed =
+      named === undefined
+        ? cookies.find((value) => value.startsWith("cua_session="))?.slice(12)
+        : named.slice(sessionCookie.length + 1);
+    const id = verifiedSessionId(signed);
     const session = db.session(id);
     res.locals.session = session;
-    if (session.id !== id)
-      res.cookie("cua_session", `${session.id}.${mac(session.id)}`, {
+    if (session.id !== id || named === undefined)
+      res.cookie(sessionCookie, `${session.id}.${mac(session.id)}`, {
         httpOnly: true,
         sameSite: "strict",
         maxAge: 86400000,
@@ -189,6 +202,26 @@ export function createApp(config: Config) {
         !!config.ELEVENLABS_AGENT_ID,
     }),
   );
+  app.get("/api/elastic/products", async (_req, res) => {
+    if (!cloud) {
+      res.status(503).json({ error: "Elastic Cloud is not configured." });
+      return;
+    }
+    const controller = new AbortController();
+    res.once("close", () => {
+      if (!res.writableEnded) controller.abort();
+    });
+    try {
+      const result = await cloud.products(controller.signal);
+      if (!res.destroyed) res.json(result);
+    } catch (error) {
+      const detail =
+        error instanceof ElasticCloudError
+          ? error.message
+          : "Elastic could not load the product catalog. Try again shortly.";
+      if (!res.destroyed) res.status(503).json({ error: detail });
+    }
+  });
   // One active request per local session; a single private corpus is configured by the owner.
   const cloudActive = new Set<string>();
   const cloudRequests = new Map<
