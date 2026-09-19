@@ -9,7 +9,7 @@ The guided tour replays saved results. It does not start a hosted research job. 
 - `showcase/data/demo.json`: four results exported through the real API: `overview`, `pricing`, `excluded`, and `challenge`.
 - `showcase/assets/walkthrough.mp4`: actual browser recording, encoded as H.264 with fast start.
 - `showcase/assets/poster.webp`: a direct screenshot of the actual app's overview findings card.
-- `showcase/assets/preview.gif`: a small excerpt of the same recording.
+- `showcase/assets/preview.gif`: a cropped excerpt of the same recording. The crop frames the findings and source column, removes the unrelated setup banner, and keeps the actual counts, citations, and actions unchanged.
 - `showcase/assets/captions.vtt`: timed text that describes each recorded action.
 
 The exported data preserves the API's metrics, original fixture IDs, quotations, findings text, filters, and limitations. It removes session IDs, research IDs, request IDs, and runtime generation timestamps. Runtime scope and finding IDs are replaced with deterministic presentation IDs derived from the fixture version and filters. These IDs support the static tour; they are not accepted research-job credentials. The brief retains its real content and citations, with the generation timestamp removed and its scope identifier changed to the corresponding presentation ID.

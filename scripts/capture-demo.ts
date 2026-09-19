@@ -498,7 +498,8 @@ try {
       "90",
       path.join(assets, "poster.webp"),
     ]);
-    // A short excerpt of actual research and citation inspection; never generated UI.
+    // Crop the recorded findings/source column, excluding the unrelated setup banner.
+    // These coordinates use the fixed 1440 × 900 recording viewport; UI content is unchanged.
     encode([
       "-ss",
       String(captions[1].start),
@@ -507,7 +508,7 @@ try {
       "-i",
       rawVideo,
       "-filter_complex",
-      "fps=8,scale=720:-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=96[p];[s1][p]paletteuse=dither=bayer:bayer_scale=3",
+      "crop=800:720:320:120,fps=8,scale=720:-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=96[p];[s1][p]paletteuse=dither=bayer:bayer_scale=3",
       "-loop",
       "0",
       path.join(assets, "preview.gif"),
