@@ -45,3 +45,21 @@ The secret scanner checks files and Git history for known patterns. `--secrets-f
 The follow-up passed TypeScript/ESLint, 288 unit tests, 21 real local Elasticsearch integration tests, and the production build. All 18 browser cases passed across a full run and one focused rerun after a test selector correction. The browser checks used an isolated fixture API and mocked Cloud responses. Formatting and the working-tree/full-history secret scan also passed; the scan compared against local configured values without printing them.
 
 Independent code review covered backend product isolation, frontend stale-response handling, and the shared handoff. These checks establish this reference implementation's behavior. They do not certify another frontend, X/Reddit collector, a changing live dataset, or physical microphone quality. Read the PR checks for the final pushed revision.
+
+## Public demo release: 19 September 2026
+
+The public showcase adds an independently checked synthetic export and a recorded application flow. The complete local validation passed 304 unit tests, 21 real Elasticsearch integration tests, 18 application browser tests, and 6 public-demo browser tests. TypeScript, ESLint, both builds, formatting, and secret scans passed. The public browser suite checks source inspection, restored scope, opposing evidence, exact brief download, failed-load recovery, non-synthetic data rejection, keyboard/mobile controls, captions, and real video playback.
+
+The 59.88-second recording runs the built application against SQLite and Elasticsearch with provider credentials absent. Its four exported states match a fresh data-only API export byte for byte. Public-data tests compare counts and original quotations with the independent fixture. These checks do not claim a hosted live backend or a provider conversation.
+
+The public artifact is released manually to the dedicated Vercel `cua-parse-demo` project after the reviewed `main` revision passes verification. The deployment contains only `.site/`, not the research API or its runtime configuration. The builder rejects linked/hidden files, unsupported file types, non-fixture originals, and private runtime fields. Rebuild and relink the output directory before each release; the build removes the previous `.site/` directory.
+
+The canonical public URL is `https://cua-parse-demo.vercel.app/`. After each deployment, check the published artifact with:
+
+```sh
+SHOWCASE_BASE_URL=https://cua-parse-demo.vercel.app/ npm run test:showcase
+```
+
+The initial public Vercel release also passed all six browser cases anonymously over HTTPS. Environment and Vercel metadata paths returned HTTP 404. A successful local run alone does not prove that a hosted release is accessible. Record the actual reviewed revision, deployment URL, and hosted test result before reporting publication complete. No live provider conversation is part of this static-site check.
+
+The optional `Publish optional Pages demo` GitHub Pages workflow is disabled unless `ENABLE_GITHUB_PAGES` is exactly `true`. When enabled, it accepts only the selected current `main` revision after a successful `Verify` push or an explicit main-branch recovery dispatch. It does not publish to Vercel. See [HOSTING.md](HOSTING.md) for release and rollback commands, and [DEMO.md](DEMO.md) for reproduction steps.
