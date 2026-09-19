@@ -2,7 +2,7 @@
 
 CUA Parse connects product research questions to original feedback and scoped evidence counts. Type or speak to an ElevenLabs analyst, inspect its sources, and exclude a large discussion to see how the findings change.
 
-For an existing YouTube feedback index, choose **YouTube comments · Elastic** and ask a question such as “What do people dislike about Microsoft Teams?” Elasticsearch calculates the counts. Elastic Agent Builder selects supporting source passages. The app verifies each passage against the original comment and assigns its citation.
+For an existing YouTube feedback index, choose **YouTube comments · Elastic**, select a product, and ask a question such as “What do people dislike about Microsoft Teams?” Elasticsearch calculates the counts. Elastic Agent Builder selects supporting source passages. The app verifies each passage against the original comment and assigns its citation.
 
 ## Run locally
 
@@ -31,7 +31,7 @@ Store keys only in the ignored `.env` file. Restart the API after changes.
 - **Live feedback analysis:** set `OPENAI_API_KEY` and `ANALYSIS_MODE=openai`. Without this, live and imported records remain unlabelled. Fixture labels are always synthetic.
 - **Uploaded Elastic corpus:** copy the four `ELASTIC_CLOUD_*` settings from `.env.example` into your ignored `.env` and enter their values there. This is a separate, read-only source. It uses direct typed questions. The live discussion source supports ElevenLabs text and voice.
 
-See [setup](docs/SETUP.md) for configuration, [integration](docs/INTEGRATION.md) for reuse in another frontend, and [verification](docs/VERIFICATION.md) for tests.
+See [setup](docs/SETUP.md) for configuration, [integration](docs/INTEGRATION.md) for reuse in another frontend, and [verification](docs/VERIFICATION.md) for tests. For coordination across separate frontend, backend, and collection teams, use the [shared agent handoff](docs/AGENT_HANDOFF.md).
 
 ## Evidence rules
 

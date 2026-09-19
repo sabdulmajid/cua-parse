@@ -1,6 +1,6 @@
 # Synthetic research fixture
 
-`acmeflow.ts` defines 22 invented records. One is an exact duplicate. Every URL is null. The declared labels support a repeatable product demonstration without model credentials. Fixture labels apply only when the product is AcmeFlow and the record text, source, provenance, ID, thread ID, and title match.
+`acmeflow.ts` defines 22 invented records. One repeats the same source ID and payload as an exact duplicate. Every URL is null. The declared labels support a repeatable product demonstration without model credentials. Fixture labels apply only when the product is AcmeFlow and the record text, source, provenance, ID, thread ID, and title match.
 
 `acmeflow.expected.json` is an independent test oracle. Application code does not import its totals. It defines the exact counts before and after exclusion of the eight-record complaint thread. The fixture includes pricing praise, mixed aspect sentiment, unrelated and ambiguous products, a missing publication date, and an instruction injection. The injection is source text and has no counted aspects.
 
@@ -16,6 +16,12 @@ The [YC terms](https://www.ycombinator.com/legal/) restrict commercial reuse unl
 
 ## Analysis
 
-Live model analysis uses the official OpenAI SDK `responses.parse()` with `zodTextFormat()`, as documented in [Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs). It sends up to four records per request, disables response storage, uses one retry, and respects cancellation. The application validates record IDs, relevance/identity consistency, exact supporting quote spans, exact product-name identity spans, and one label per aspect. Schema and quote validation do not prove that a model interpretation is correct. Aliases without the requested product name remain ambiguous.
+Live model analysis uses the official OpenAI SDK `responses.create()` with `zodTextFormat()`, as documented in [Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs). It sends up to four records per request, disables response storage and SDK retries, permits one selective repair pass for locally invalid labels, and respects cancellation. The application validates record IDs, relevance/identity consistency, exact supporting quote spans, exact product-name identity spans, and one label per aspect. Schema and quote validation do not prove that a model interpretation is correct. Identity requires the requested product name or the explicit vendor-qualified Microsoft Team/Microsoft Teams spelling alias. Bare Teams is not a full identity span.
 
 Validated labels are cached for 30 minutes in a bounded process cache, keyed by session, product, model, analysis version, source text and thread context. Cached labels are copied into each immutable snapshot. No cache is shared with another app session. Process restart clears the cache. Missing analysis does not trigger a hidden heuristic: unlabeled records have unknown identity and no counted sentiments.
+
+## Stable source identity
+
+Analysis deduplicates repeated records by `id`, not by text. Distinct IDs remain separate even when their text and thread context are identical. Repeated IDs must have the same source, provenance, text, URL, thread ID/title, parent ID, and publication date. Only `collectedAt` may differ; analysis keeps the first observation's collection time. Imports reject conflicting metadata before analysis. A direct analysis caller receives a failure for a conflicting occurrence, which is excluded; the first record remains. `contentHash` is a text fingerprint for change detection and caching, not the identity of a comment.
+
+The synthetic duplicate now repeats its original ID. The fixture oracle remains 22 input records, one duplicate, and 21 unique records. Deleted or dead HN originals are not retained, but their valid descendants remain eligible within the collection limits. This traversal does not implement deletion synchronization for stored snapshots.

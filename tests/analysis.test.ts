@@ -177,7 +177,7 @@ describe("declared synthetic evidence", () => {
       ),
     ).rejects.toThrow("only describe AcmeFlow");
   });
-  it("deduplicates exact source text but preserves distinct comments", async () => {
+  it("preserves distinct source IDs with identical text and fingerprints", async () => {
     expect(contentHash("cafe\u0301\r\ntext")).toBe(contentHash("café\ntext"));
     const record = raw();
     const result = await analyze(
@@ -189,8 +189,67 @@ describe("declared synthetic evidence", () => {
       context,
       options("unlabeled"),
     );
+    expect(result.duplicates).toBe(0);
+    expect(result.records).toHaveLength(3);
+    expect(result.records[0].contentHash).toBe(result.records[1].contentHash);
+  });
+  it("preserves identical text with different product and thread context", async () => {
+    const first = {
+      ...raw(),
+      text: "It freezes every morning.",
+      threadTitle: "Other product",
+    };
+    const second = {
+      ...first,
+      id: "other-native-id",
+      threadId: "second-thread",
+      threadTitle: "AcmeFlow",
+    };
+    const result = await analyze(
+      [first, second],
+      context,
+      options("unlabeled"),
+    );
+    expect(result.duplicates).toBe(0);
+    expect(result.records.map((record) => record.threadTitle)).toEqual([
+      "Other product",
+      "AcmeFlow",
+    ]);
+  });
+  it("deduplicates one stable source ID while retaining its first collection time", async () => {
+    const first = raw();
+    const result = await analyze(
+      [first, { ...first, collectedAt: "2026-09-20T00:00:00.000Z" }],
+      context,
+      options("unlabeled"),
+    );
     expect(result.duplicates).toBe(1);
-    expect(result.records).toHaveLength(2);
+    expect(result.records).toHaveLength(1);
+    expect(result.records[0].collectedAt).toBe(first.collectedAt);
+  });
+  it.each([
+    { text: "Different source text." },
+    { threadId: "another-thread" },
+    { threadTitle: "Another product" },
+    { parentId: "another-parent" },
+    { url: "https://example.org/another" },
+    { publishedAt: "2026-09-01T00:00:00.000Z" },
+    { source: "hackernews" as const },
+    { provenance: "live" as const },
+  ])("reports conflicting payload for one source ID: %j", async (change) => {
+    const first = raw();
+    const result = await analyze(
+      [first, { ...first, ...change }],
+      context,
+      options("unlabeled"),
+    );
+    expect(result.duplicates).toBe(0);
+    expect(result.records).toHaveLength(1);
+    expect(result.records[0].text).toBe(first.text);
+    expect(result.records[0].threadTitle).toBe(first.threadTitle);
+    expect(result.failures.join(" ")).toContain(
+      "conflicting source content or metadata",
+    );
   });
   it("uses no hidden heuristic when analysis is disabled", async () => {
     const result = await analyze([raw()], context, options("unlabeled"));

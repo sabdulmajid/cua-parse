@@ -220,6 +220,7 @@ export const elasticScopeSchema = z
 export type ElasticScope = z.infer<typeof elasticScopeSchema>;
 export const elasticQuerySchema = z
   .object({
+    product: z.string().trim().min(1).max(120).default("Microsoft Teams"),
     question: z.string().trim().min(3).max(2000),
     scope: elasticScopeSchema.default({
       excludedVideoIds: [],
@@ -231,6 +232,7 @@ export const elasticQuerySchema = z
   .strict();
 export type ElasticQueryInput = z.infer<typeof elasticQuerySchema>;
 export interface ElasticComment {
+  product: string;
   id: string;
   text: string;
   videoId: string;
@@ -261,6 +263,7 @@ export interface ElasticMetrics {
   categories: Array<{ name: string; count: number }>;
 }
 export interface ElasticAnswer {
+  product: string;
   requestId: string;
   question: string;
   scope: ElasticScope;
@@ -271,4 +274,8 @@ export interface ElasticAnswer {
   toolCalls: Array<{ tool: string; query?: string }>;
   limitations: string[];
   generatedAt: string;
+}
+
+export interface ElasticProductsResponse {
+  products: string[];
 }

@@ -1512,6 +1512,32 @@ th:first-child {
   font-size: 11px;
   line-height: 1.7;
 }
+.elastic-product-choice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 14px;
+  color: #34465f;
+  font-size: 13px;
+}
+.elastic-product-choice select {
+  min-width: 0;
+  max-width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #c5cdd7;
+  border-radius: 6px;
+  background: #fff;
+  color: #26364c;
+}
+.elastic-product-choice label {
+  flex-shrink: 0;
+}
+.elastic-catalog-error {
+  margin-bottom: 16px;
+}
+.elastic-product-choice + .elastic-scope-note {
+  margin: 0 0 14px;
+}
 .elastic-workspace .composer-controls {
   min-height: 35px;
 }

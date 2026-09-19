@@ -8,6 +8,8 @@ import type {
 
 const firstVideo = "video000001";
 const secondVideo = "video000002";
+const teams = "Microsoft Teams";
+const iphone = "iPhone 18";
 const question = "What problems do people report about Teams?";
 const baseScope = { excludedVideoIds: [], from: null, to: null };
 
@@ -15,6 +17,7 @@ function answer(input: ElasticQueryInput, text?: string): ElasticAnswer {
   const excluded = input.scope.excludedVideoIds.includes(firstVideo);
   const videoId = excluded ? secondVideo : firstVideo;
   return {
+    product: input.product,
     requestId: input.requestId,
     question: input.question,
     scope: input.scope,
@@ -62,10 +65,13 @@ function answer(input: ElasticQueryInput, text?: string): ElasticAnswer {
     },
     examples: [
       {
+        product: input.product,
         id: excluded ? "mock-comment-two" : "mock-comment-one",
         text: excluded
           ? "Notifications do not arrive."
-          : "Teams freezes during calls.",
+          : input.product === iphone
+            ? "iPhone 18 heats up during calls."
+            : "Teams freezes during calls.",
         videoId,
         videoTitle: excluded
           ? "Mock notification discussion"
@@ -131,13 +137,16 @@ async function isolate(page: Page) {
   await page.route("**/api/session", (route) =>
     route.fulfill({ json: session }),
   );
+  await page.route("**/api/elastic/products", (route) =>
+    route.fulfill({ json: { products: [teams, iphone] } }),
+  );
   return () => {
     expect(blocked).toEqual([]);
     expect(microphoneRequests).toBe(0);
   };
 }
 
-async function chooseElastic(page: Page) {
+async function chooseElastic(page: Page, waitForCatalog = true) {
   await page.goto("/");
   await expect(page.getByLabel("Research source", { exact: true })).toHaveValue(
     "live",
@@ -146,6 +155,12 @@ async function chooseElastic(page: Page) {
     .getByLabel("Research source", { exact: true })
     .selectOption("elastic");
   await expect(page.getByLabel("Message", { exact: true })).toBeVisible();
+  if (waitForCatalog) {
+    await expect(page.getByLabel("Product", { exact: true })).toBeEnabled();
+    await expect(page.getByLabel("Product", { exact: true })).toHaveValue(
+      teams,
+    );
+  }
 }
 
 async function send(page: Page, text: string) {
@@ -261,6 +276,7 @@ test("mocked Elastic text answer shows counts and sources; exclude/reset preserv
       sources.getByRole("link", { name: "View video", exact: true }),
     ).toHaveAttribute("href", `https://www.youtube.com/watch?v=${secondVideo}`);
     expect(requests[1]).toMatchObject({
+      product: teams,
       question,
       scope: { ...baseScope, excludedVideoIds: [firstVideo] },
     });
@@ -271,7 +287,11 @@ test("mocked Elastic text answer shows counts and sources; exclude/reset preserv
       page.getByText("120 comments in scope", { exact: true }),
     ).toBeVisible();
     expect(requests).toHaveLength(3);
-    expect(requests[2]).toMatchObject({ question, scope: baseScope });
+    expect(requests[2]).toMatchObject({
+      product: teams,
+      question,
+      scope: baseScope,
+    });
     expect(new Set(requests.map((request) => request.requestId)).size).toBe(3);
     await page.reload();
     await expect(
@@ -300,6 +320,11 @@ test("a cancelled mocked Elastic response cannot replace the next answer", async
       } finally {
         delivered = true;
       }
+    } else if (requests.length === 3) {
+      await route.fulfill({
+        status: 503,
+        json: { error: "Mock scoped request failed." },
+      });
     } else
       await route.fulfill({
         json: answer(input, "Current answer: notifications are missing."),
@@ -326,6 +351,23 @@ test("a cancelled mocked Elastic response cannot replace the next answer", async
       "Current answer: notifications are missing.",
     );
     expect(requests).toHaveLength(2);
+    expect(requests[1].requestId).not.toBe(requests[0].requestId);
+    await page
+      .getByRole("button", { name: "Exclude largest video", exact: true })
+      .click();
+    await expect(page.getByRole("alert")).toContainText(
+      "Mock scoped request failed.",
+    );
+    await page
+      .getByRole("button", { name: "Retry question", exact: true })
+      .click();
+    await expect(page.locator(".elastic-answer")).toContainText(
+      "Current answer: notifications are missing.",
+    );
+    expect(requests).toHaveLength(4);
+    expect(requests[2].scope.excludedVideoIds).toEqual([firstVideo]);
+    expect(requests[2].requestId).not.toBe(requests[0].requestId);
+    expect(requests[3]).toEqual(requests[2]);
     assertIsolated();
   } finally {
     gate.release();
@@ -372,21 +414,28 @@ test("a late mocked Elastic response cannot switch the selected source back from
   }
 });
 
-test("a mocked Elastic error can retry the same question without voice credentials", async ({
+test("a lost Elastic response retries the same request and reuses its cached answer", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const assertIsolated = await isolate(page);
   const requests: ElasticQueryInput[] = [];
+  const cache = new Map<string, ElasticAnswer>();
+  let providerCalls = 0;
   await page.route("**/api/elastic/query", async (route) => {
     const input = route.request().postDataJSON() as ElasticQueryInput;
     requests.push(input);
+    if (!cache.has(input.requestId)) {
+      providerCalls++;
+      cache.set(input.requestId, answer(input));
+    }
+    // Simulate a response lost after the server completed and cached the work.
     if (requests.length === 1)
       await route.fulfill({
         status: 503,
         json: { error: "Mock Elastic temporary failure." },
       });
-    else await route.fulfill({ json: answer(input) });
+    else await route.fulfill({ json: cache.get(input.requestId) });
   });
   await chooseElastic(page);
   await send(page, question);
@@ -400,8 +449,13 @@ test("a mocked Elastic error can retry the same question without voice credentia
     "The comments report slow calls and missing notifications.",
   );
   expect(requests).toHaveLength(2);
-  expect(requests[1]).toMatchObject({ question, scope: baseScope });
-  expect(requests[1].requestId).not.toBe(requests[0].requestId);
+  expect(requests[1]).toMatchObject({
+    product: teams,
+    question,
+    scope: baseScope,
+  });
+  expect(requests[1]).toEqual(requests[0]);
+  expect(providerCalls).toBe(1);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -472,6 +526,231 @@ test("persisted Elastic mode exposes a failed session request and recovers witho
   );
   expect(sessionRequests).toBe(2);
   expect(requests).toHaveLength(1);
-  expect(requests[0]).toMatchObject({ question, scope: baseScope });
+  expect(requests[0]).toMatchObject({
+    product: teams,
+    question,
+    scope: baseScope,
+  });
   assertIsolated();
+});
+
+for (const mismatch of ["answer product", "source product"] as const) {
+  test(`an iPhone query rejects a mocked response with a different ${mismatch}`, async ({
+    page,
+  }) => {
+    const assertIsolated = await isolate(page);
+    const requests: ElasticQueryInput[] = [];
+    await page.route("**/api/elastic/query", async (route) => {
+      const input = route.request().postDataJSON() as ElasticQueryInput;
+      requests.push(input);
+      const result = answer(input, "WRONG PRODUCT ANSWER [1]");
+      if (mismatch === "answer product") result.product = teams;
+      else result.examples[0].product = teams;
+      await route.fulfill({ json: result });
+    });
+
+    await chooseElastic(page);
+    await page.getByLabel("Product", { exact: true }).selectOption(iphone);
+    await send(page, "What problems do people report about iPhone 18?");
+    await expect(page.getByRole("alert")).toHaveText(
+      "The response did not match the selected product. Please retry.",
+    );
+    await expect(page.locator(".elastic-answer")).toHaveCount(0);
+    await expect(
+      page.getByText("WRONG PRODUCT ANSWER", { exact: false }),
+    ).toHaveCount(0);
+    expect(requests).toHaveLength(1);
+    expect(requests[0].product).toBe(iphone);
+    assertIsolated();
+  });
+}
+
+test("a late Teams reply cannot replace an iPhone answer after the product changes", async ({
+  page,
+}) => {
+  const assertIsolated = await isolate(page);
+  const gate = deferred();
+  const requests: ElasticQueryInput[] = [];
+  let delivered = false;
+  await page.route("**/api/elastic/query", async (route) => {
+    const input = route.request().postDataJSON() as ElasticQueryInput;
+    requests.push(input);
+    if (input.product === teams) {
+      await gate.promise;
+      try {
+        await fulfillDelayed(route, answer(input, "STALE TEAMS ANSWER"));
+      } finally {
+        delivered = true;
+      }
+    } else {
+      await route.fulfill({
+        json: answer(
+          input,
+          "Current iPhone comments report heat during calls. [1]",
+        ),
+      });
+    }
+  });
+  try {
+    await chooseElastic(page);
+    await send(page, question);
+    await expect.poll(() => requests.length).toBe(1);
+    const nextQuestion = "What problems do people report about iPhone 18?";
+    await page.getByLabel("Message", { exact: true }).fill(nextQuestion);
+    await page.getByLabel("Product", { exact: true }).selectOption(iphone);
+    await expect(page.getByLabel("Message", { exact: true })).toHaveValue(
+      nextQuestion,
+    );
+    await send(page, nextQuestion);
+    await expect(page.locator(".elastic-answer")).toContainText(
+      "Current iPhone comments report heat during calls.",
+    );
+    await page
+      .locator(".elastic-answer .conclusion")
+      .getByRole("link", { name: "Source 1", exact: true })
+      .click();
+    await expect(page.locator("#elastic-source-1 blockquote")).toHaveText(
+      "iPhone 18 heats up during calls.",
+    );
+    gate.release();
+    await expect.poll(() => delivered).toBe(true);
+    await settleDisplay(page);
+    await expect(page.getByLabel("Product", { exact: true })).toHaveValue(
+      iphone,
+    );
+    await expect(
+      page.getByText("STALE TEAMS ANSWER", { exact: false }),
+    ).toHaveCount(0);
+    await expect(page.locator(".elastic-answer")).toContainText(
+      "Current iPhone comments report heat during calls.",
+    );
+    expect(requests).toHaveLength(2);
+    expect(requests[1]).toMatchObject({
+      product: iphone,
+      question: nextQuestion,
+      scope: baseScope,
+    });
+    expect(requests[1].requestId).not.toBe(requests[0].requestId);
+    assertIsolated();
+  } finally {
+    gate.release();
+  }
+});
+
+test("changing product clears an excluded scope and its failed retry while preserving the draft", async ({
+  page,
+}) => {
+  const assertIsolated = await isolate(page);
+  const requests: ElasticQueryInput[] = [];
+  await page.route("**/api/elastic/query", async (route) => {
+    const input = route.request().postDataJSON() as ElasticQueryInput;
+    requests.push(input);
+    if (requests.length === 2) {
+      await route.fulfill({
+        status: 503,
+        json: { error: "Mock excluded Teams request failed." },
+      });
+    } else await route.fulfill({ json: answer(input) });
+  });
+  await chooseElastic(page);
+  await send(page, question);
+  await expect(page.locator(".elastic-answer")).toBeVisible();
+  await page
+    .getByRole("button", { name: "Exclude largest video", exact: true })
+    .click();
+  await expect(page.getByRole("alert")).toContainText(
+    "Mock excluded Teams request failed.",
+  );
+  await expect(
+    page.getByRole("button", { name: "Retry question", exact: true }),
+  ).toBeVisible();
+  const draft = "What about battery life?";
+  await page.getByLabel("Message", { exact: true }).fill(draft);
+  await page.getByLabel("Product", { exact: true }).selectOption(iphone);
+  await expect(page.getByRole("alert")).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Retry question", exact: true }),
+  ).toHaveCount(0);
+  await expect(page.locator(".elastic-answer")).toHaveCount(0);
+  await expect(page.getByLabel("Message", { exact: true })).toHaveValue(draft);
+  await send(page, draft);
+  await expect(
+    page.getByText("120 comments in scope", { exact: true }),
+  ).toBeVisible();
+  expect(requests).toHaveLength(3);
+  expect(requests[1]).toMatchObject({
+    product: teams,
+    scope: { ...baseScope, excludedVideoIds: [firstVideo] },
+  });
+  expect(requests[2]).toMatchObject({
+    product: iphone,
+    question: draft,
+    scope: baseScope,
+  });
+  expect(new Set(requests.map((request) => request.requestId)).size).toBe(3);
+  await expect(page.getByLabel("Message", { exact: true })).toHaveValue("");
+  await page.getByLabel("Product", { exact: true }).selectOption(teams);
+  await expect(page.getByLabel("Message", { exact: true })).toHaveValue(draft);
+  await expect(page.locator(".elastic-answer")).toHaveCount(0);
+  assertIsolated();
+});
+
+test("a failed product catalog can retry and blocks queries until products load", async ({
+  page,
+}) => {
+  const assertIsolated = await isolate(page);
+  const gate = deferred();
+  let catalogRequests = 0;
+  const requests: ElasticQueryInput[] = [];
+  await page.route("**/api/elastic/products", async (route) => {
+    catalogRequests++;
+    if (catalogRequests === 1) {
+      await route.fulfill({
+        status: 503,
+        json: { error: "Mock product catalog is unavailable." },
+      });
+    } else {
+      await gate.promise;
+      await route.fulfill({ json: { products: [iphone] } });
+    }
+  });
+  await page.route("**/api/elastic/query", async (route) => {
+    const input = route.request().postDataJSON() as ElasticQueryInput;
+    requests.push(input);
+    await route.fulfill({ json: answer(input) });
+  });
+  try {
+    await chooseElastic(page, false);
+    await expect(page.getByRole("alert")).toContainText(
+      "Mock product catalog is unavailable.",
+    );
+    await page
+      .getByLabel("Message", { exact: true })
+      .fill("What about battery life?");
+    const sendButton = page.getByRole("button", {
+      name: "Send message",
+      exact: true,
+    });
+    await expect(sendButton).toBeDisabled();
+    expect(requests).toHaveLength(0);
+    await page
+      .getByRole("button", { name: "Retry products", exact: true })
+      .click();
+    await expect.poll(() => catalogRequests).toBe(2);
+    await expect(sendButton).toBeDisabled();
+    expect(requests).toHaveLength(0);
+    gate.release();
+    await expect(page.getByLabel("Product", { exact: true })).toHaveValue(
+      iphone,
+    );
+    await expect(sendButton).toBeEnabled();
+    await expect(page.getByRole("alert")).toHaveCount(0);
+    await sendButton.click();
+    await expect(page.locator(".elastic-answer")).toBeVisible();
+    expect(requests).toHaveLength(1);
+    expect(requests[0]).toMatchObject({ product: iphone, scope: baseScope });
+    assertIsolated();
+  } finally {
+    gate.release();
+  }
 });

@@ -26,11 +26,11 @@ Set `OPENAI_API_KEY` and `ANALYSIS_MODE=openai` for live feedback labels. Schema
 
 The separate settings `ELASTIC_CLOUD_URL`, `ELASTIC_CLOUD_KIBANA_URL`, `ELASTIC_CLOUD_API_KEY`, and `ELASTIC_CLOUD_INDEX` connect an existing YouTube comment corpus. The first URL is the Elasticsearch HTTPS origin. The second is the Kibana HTTPS origin used by Agent Builder. The key needs index read access and Agent Builder access.
 
-The adapter expects comment text, author, publication date, engagement fields, video context, and uploaded sentiment, complaint, and category fields. See `src/server/elastic-cloud.ts` for mapping and aggregation details. The default index name is `youtube-product-comments`.
+Select a product before submitting an uploaded-corpus question. The product catalog is read from Elasticsearch without a model call. Every scoped query includes the selected `product`; the wording of the question does not change this selection. The adapter reads product labels, original comment IDs and text, publication dates, like counts, video context, and uploaded sentiment, complaint, and category fields. It does not request author data. Category keywords may be one string or an array; supported string boolean values are normalized. Other malformed label types are rejected. See `src/server/elastic-cloud.ts` for mapping and aggregation details. The default index name is `youtube-product-comments`.
 
 The app reads counts and originals from Elasticsearch, verifies fixed-index ES|QL counts through Agent Builder, then asks the agent to select evidence. The explanation step has tools and Elastic capabilities disabled. The server renders verified source sentences and assigns citations. It does not write to the uploaded index or create remote agents.
 
-Questions have a 150-second provider deadline and no automatic retry. Local limits permit one active request per session, two globally, and 30 per hour. Completed request IDs can replay the same answer for 30 minutes. Model context is limited to 500 complete comments and 100,000 characters; counts still cover the full scope. Uploaded labels are metadata, not independently validated opinions.
+Questions have a 150-second provider deadline and no automatic retry. Local limits permit one active request per session, two globally, and 30 per hour. Completed request IDs can replay the same answer for 30 minutes. Model context is limited to 500 complete comments and 100,000 characters; counts still cover the full scope. Ingestion must give each native comment one stable Elasticsearch document ID. The reader rejects duplicate native IDs it observes, but it does not audit uniqueness beyond the retrieved originals. Uploaded labels are metadata, not independently validated opinions.
 
 ## Troubleshooting
 

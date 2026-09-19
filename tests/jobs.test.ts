@@ -443,6 +443,59 @@ describe("bounded worker with explicit provider mocks", () => {
       }),
     ).toThrow("already used");
   });
+  it("enforces the active-job cap for equal questions with new keys while permitting a replay", async () => {
+    const f = fixture();
+    mocks.collect.mockImplementation(
+      async (_input: StartInput, opts: CollectionOptions) =>
+        onAbort(opts.signal),
+    );
+    const firstInput = testInput("same-question-one");
+    const first = f.runner.submit(f.session, firstInput);
+    const second = f.runner.submit(f.session, testInput("same-question-two"));
+    expect(second.id).not.toBe(first.id);
+    expect(() =>
+      f.runner.submit(f.session, testInput("same-question-three")),
+    ).toThrow("Two research jobs");
+    expect(f.db.listJobs(f.session)).toHaveLength(2);
+    expect(f.runner.submit(f.session, firstInput).id).toBe(first.id);
+    try {
+      f.runner.submit(f.session, {
+        ...firstInput,
+        question: "Changed payload",
+      });
+      throw new Error("Expected an idempotency conflict");
+    } catch (error) {
+      expect(error).toMatchObject({
+        status: 409,
+        message: "Idempotency key was already used for another request.",
+      });
+    }
+  });
+  it("permits an existing same-key replay when the global queue is full", async () => {
+    const f = fixture();
+    mocks.collect.mockImplementation(
+      async (_input: StartInput, opts: CollectionOptions) =>
+        onAbort(opts.signal),
+    );
+    const firstInput = testInput("full-queue-original");
+    const first = f.runner.submit(f.session, firstInput);
+    await state(f.db, f.session, first.id, "collecting");
+    for (let i = 0; i < 10; i++)
+      f.runner.submit(f.db.session().id, testInput(`full-queue-${i}`));
+    expect(() =>
+      f.runner.submit(f.db.session().id, testInput("full-queue-extra")),
+    ).toThrow("queue is full");
+    expect(f.runner.submit(f.session, firstInput).id).toBe(first.id);
+    try {
+      f.runner.submit(f.session, {
+        ...firstInput,
+        product: "Different product",
+      });
+      throw new Error("Expected an idempotency conflict");
+    } catch (error) {
+      expect(error).toMatchObject({ status: 409 });
+    }
+  });
   it("keeps discovered stories separate from collected feedback in progress", async () => {
     const f = fixture();
     const gate = deferred<{

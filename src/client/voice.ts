@@ -80,11 +80,15 @@ export function safeEvidenceUrl(value: string | null): string | null {
   if (!value) return null;
   try {
     const url = new URL(value);
-    const host = url.hostname.toLowerCase();
+    const host = url.hostname.toLowerCase().replace(/\.+$/, "");
     if (
       !["https:", "http:"].includes(url.protocol) ||
       url.username ||
       url.password ||
+      url.port ||
+      [...value].some(
+        (character) => character.charCodeAt(0) <= 32 || character === "\\",
+      ) ||
       !host.includes(".") ||
       host.endsWith(".local") ||
       host.endsWith(".localhost") ||
@@ -93,6 +97,7 @@ export function safeEvidenceUrl(value: string | null): string | null {
       host.includes(":")
     )
       return null;
+    url.hostname = host;
     return url.href;
   } catch {
     return null;

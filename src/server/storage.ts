@@ -49,21 +49,30 @@ export class LocalStore {
         .all(session) as { job: string }[]
     ).map((r) => JSON.parse(r.job));
   }
-  insertJob(
+  findJobByIdempotency(
     session: string,
     input: StartInput,
-  ): { job: ResearchJob; created: boolean } {
+  ): ResearchJob | undefined {
     const row = this.db
       .prepare("SELECT input,job FROM jobs WHERE session=? AND idem=?")
       .get(session, input.idempotencyKey) as
       { input: string; job: string } | undefined;
     if (row) {
       if (row.input !== JSON.stringify(input))
-        throw new Error(
-          "Idempotency key was already used for another request.",
+        throw Object.assign(
+          new Error("Idempotency key was already used for another request."),
+          { status: 409 },
         );
-      return { job: JSON.parse(row.job), created: false };
+      return JSON.parse(row.job) as ResearchJob;
     }
+    return undefined;
+  }
+  insertJob(
+    session: string,
+    input: StartInput,
+  ): { job: ResearchJob; created: boolean } {
+    const existing = this.findJobByIdempotency(session, input);
+    if (existing) return { job: existing, created: false };
     const now = new Date().toISOString();
     const job: ResearchJob = {
       id: randomUUID(),

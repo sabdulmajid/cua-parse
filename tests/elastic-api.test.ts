@@ -13,10 +13,15 @@ import { tmpdir } from "node:os";
 import type { Server } from "node:http";
 import type { ElasticAnswer } from "../src/shared/contracts.js";
 const port = Number(process.env.ELASTIC_API_TEST_PORT || 3098);
-const mocked = vi.hoisted(() => ({ query: vi.fn(), close: vi.fn() }));
+const mocked = vi.hoisted(() => ({
+  query: vi.fn(),
+  products: vi.fn(),
+  close: vi.fn(),
+}));
 vi.mock("../src/server/elastic-cloud.js", () => ({
   ElasticCloud: class {
     query = mocked.query;
+    products = mocked.products;
     close = mocked.close;
   },
   ElasticCloudError: class extends Error {},
@@ -34,6 +39,7 @@ const input = (id: string) => ({
   requestId: id,
 });
 const answer: ElasticAnswer = {
+  product: "Microsoft Teams",
   ...input("test-request"),
   index: "youtube-product-comments",
   answer: "A synthetic test answer.",
@@ -110,9 +116,73 @@ afterAll(async () => {
 });
 beforeEach(() => {
   mocked.query.mockReset();
+  mocked.products.mockReset();
+  mocked.products.mockResolvedValue({
+    products: ["Microsoft Teams", "iPhone 18"],
+  });
   mocked.query.mockImplementation(async (q) => ({ ...answer, ...q }));
 });
 describe("authenticated Elastic source API", () => {
+  it("loads product choices through the guarded route without an agent question", async () => {
+    const s = await session();
+    const result = await fetch(origin + "/api/elastic/products", {
+      headers: { Cookie: s.cookie },
+    });
+    expect(result.status).toBe(200);
+    expect(await result.json()).toEqual({
+      products: ["Microsoft Teams", "iPhone 18"],
+    });
+    expect(mocked.products).toHaveBeenCalledTimes(1);
+    expect(mocked.products.mock.calls[0][0]).toBeInstanceOf(AbortSignal);
+    expect(mocked.query).not.toHaveBeenCalled();
+    const denied = await fetch(origin + "/api/elastic/products", {
+      headers: { Cookie: s.cookie, Origin: "https://outside.example" },
+    });
+    expect(denied.status).toBe(403);
+    expect(mocked.products).toHaveBeenCalledTimes(1);
+  });
+  it("returns an empty catalog and sanitizes catalog provider failures", async () => {
+    const s = await session();
+    mocked.products.mockResolvedValueOnce({ products: [] });
+    const empty = await fetch(origin + "/api/elastic/products", {
+      headers: { Cookie: s.cookie },
+    });
+    expect(empty.status).toBe(200);
+    expect(await empty.json()).toEqual({ products: [] });
+    mocked.products.mockRejectedValueOnce(
+      new Error("Authorization: ApiKey server-only-test-key"),
+    );
+    const failure = await fetch(origin + "/api/elastic/products", {
+      headers: { Cookie: s.cookie },
+    });
+    expect(failure.status).toBe(503);
+    expect(JSON.stringify(await failure.json())).not.toContain(
+      "server-only-test-key",
+    );
+    expect(mocked.query).not.toHaveBeenCalled();
+  });
+  it("defaults legacy requests to Teams and includes product in replay identity", async () => {
+    const s = await session();
+    const q = input("legacy-product-request");
+    const legacy = await call(s, q);
+    expect(legacy.status).toBe(200);
+    expect(legacy.body.product).toBe("Microsoft Teams");
+    expect(mocked.query.mock.calls[0][0].product).toBe("Microsoft Teams");
+    expect((await call(s, { ...q, product: "Microsoft Teams" })).status).toBe(
+      200,
+    );
+    expect(mocked.query).toHaveBeenCalledTimes(1);
+    expect((await call(s, { ...q, product: "iPhone 18" })).status).toBe(409);
+    expect(mocked.query).toHaveBeenCalledTimes(1);
+    const selected = await call(s, {
+      ...q,
+      requestId: "new-product-request",
+      product: "iPhone 18",
+    });
+    expect(selected.status).toBe(200);
+    expect(selected.body.product).toBe("iPhone 18");
+    expect(mocked.query.mock.calls[1][0].product).toBe("iPhone 18");
+  });
   it("requires the current session CSRF and allowed origin before provider work", async () => {
     const s = await session();
     expect(

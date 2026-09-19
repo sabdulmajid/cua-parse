@@ -142,6 +142,77 @@ afterAll(async () => {
 });
 
 describe("real Elasticsearch evidence index", () => {
+  it("normalizes equivalent dates and keeps their scope identity stable", async () => {
+    const first = await query({
+      filters: filtersSchema.parse({
+        from: "2026-09-01T00:00:00Z",
+        to: timestamp,
+      }),
+    });
+    const same = await query({
+      filters: filtersSchema.parse({ from: timestamp, to: timestamp }),
+    });
+    expect(first.metrics.scopedRecords).toBe(19);
+    expect(first.filters.from).toBe(timestamp);
+    expect(first.scopeVersion).toBe(same.scopeVersion);
+  });
+  it("rejects a damaged completed snapshot while accepting a genuinely empty one", async () => {
+    const damaged = { ...job, id: randomUUID(), indexed: 2 };
+    const request = {
+      researchId: damaged.id,
+      question: "pricing",
+      filters: filtersSchema.parse({}),
+      challenge: false,
+      challengeSentiment: "negative" as const,
+      requestId: randomUUID(),
+    };
+    await store.ingest([
+      record("delete-only-this-test-record", "test-loss", [negative], {
+        researchId: damaged.id,
+      }),
+      record("keep-this-test-record", "test-keep", [positive], {
+        researchId: damaged.id,
+      }),
+    ]);
+    expect(
+      (await store.query(session, damaged, request)).metrics.collectedRecords,
+    ).toBe(2);
+    // Mutate only this run's generated test index and this test's research ID.
+    const deleted = await client.deleteByQuery({
+      index,
+      refresh: true,
+      query: {
+        bool: {
+          filter: [
+            { term: { sessionId: session } },
+            { term: { researchId: damaged.id } },
+            { term: { id: "delete-only-this-test-record" } },
+          ],
+        },
+      },
+    });
+    expect(deleted.deleted).toBe(1);
+    await expect(store.query(session, damaged, request)).rejects.toThrow(
+      "no longer matches",
+    );
+    await store.deleteResearch(session, damaged.id);
+    await expect(store.query(session, damaged, request)).rejects.toThrow(
+      "no longer matches",
+    );
+    const empty = {
+      ...job,
+      id: randomUUID(),
+      indexed: 0,
+      analyzed: 0,
+      collected: 0,
+    };
+    const packet = await store.query(session, empty, {
+      ...request,
+      researchId: empty.id,
+    });
+    expect(packet.metrics.collectedRecords).toBe(0);
+    expect(packet.evidence).toEqual([]);
+  });
   it("returns exact full-scope counts independent of top examples and request wording", async () => {
     const packet = await query();
     expect(packet.metrics).toMatchObject({
@@ -280,7 +351,7 @@ describe("real Elasticsearch evidence index", () => {
     await wrong.close();
   });
   it("returns every thread even when there are more than the default ten term buckets", async () => {
-    const extraJob = { ...job, id: randomUUID() };
+    const extraJob = { ...job, id: randomUUID(), indexed: 150 };
     await store.ingest(
       Array.from({ length: 150 }, (_, i) =>
         record(`item-${i}`, `thread-${i}`, [positive], {
@@ -304,7 +375,7 @@ describe("real Elasticsearch evidence index", () => {
     await store.deleteResearch(session, extraJob.id);
   });
   it("keeps unlabeled original text inspectable without inventing findings or opposing evidence", async () => {
-    const unlabeledJob = { ...job, id: randomUUID() };
+    const unlabeledJob = { ...job, id: randomUUID(), indexed: 3 };
     await store.ingest([
       record("unlabeled-original", "raw-one", [], {
         researchId: unlabeledJob.id,
@@ -357,14 +428,19 @@ describe("real Elasticsearch evidence index", () => {
   it("deletion cannot remove another session or another research snapshot", async () => {
     await store.deleteResearch("another-session", researchId);
     expect((await query()).metrics.collectedRecords).toBe(20);
-    const foreign = await store.query("another-session", job, {
-      researchId,
-      question: "pricing",
-      filters: filtersSchema.parse({}),
-      challenge: false,
-      challengeSentiment: "negative",
-      requestId: randomUUID(),
-    });
-    expect(foreign.metrics.collectedRecords).toBe(0);
+    await expect(
+      store.query(
+        "another-session",
+        { ...job, indexed: 1 },
+        {
+          researchId,
+          question: "pricing",
+          filters: filtersSchema.parse({}),
+          challenge: false,
+          challengeSentiment: "negative",
+          requestId: randomUUID(),
+        },
+      ),
+    ).rejects.toThrow("no longer matches");
   });
 });
