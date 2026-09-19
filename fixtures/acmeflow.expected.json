@@ -1,0 +1,78 @@
+{
+  "description": "Independent expected facts for synthetic AcmeFlow v1. Never use these values as application metrics.",
+  "rawRecords": 22,
+  "duplicates": 1,
+  "uniqueRecords": 21,
+  "relevantRecords": 18,
+  "relevantThreads": 6,
+  "aspectMentions": 24,
+  "pricing": {
+    "mentions": 13,
+    "positive": 3,
+    "negative": 9,
+    "mixed": 0,
+    "neutral": 1,
+    "unknown": 0
+  },
+  "onboarding": {
+    "mentions": 4,
+    "positive": 2,
+    "negative": 2,
+    "mixed": 0,
+    "neutral": 0,
+    "unknown": 0
+  },
+  "support": {
+    "mentions": 3,
+    "positive": 1,
+    "negative": 2,
+    "mixed": 0,
+    "neutral": 0,
+    "unknown": 0
+  },
+  "features": {
+    "mentions": 2,
+    "positive": 2,
+    "negative": 0,
+    "mixed": 0,
+    "neutral": 0,
+    "unknown": 0
+  },
+  "reliability": {
+    "mentions": 2,
+    "positive": 1,
+    "negative": 1,
+    "mixed": 0,
+    "neutral": 0,
+    "unknown": 0
+  },
+  "dominantThread": {
+    "id": "fixture:angry",
+    "records": 8,
+    "pricingNegative": 8
+  },
+  "afterExcludingAngry": {
+    "relevantRecords": 10,
+    "relevantThreads": 5,
+    "aspectMentions": 14,
+    "pricing": {
+      "mentions": 5,
+      "positive": 3,
+      "negative": 1,
+      "mixed": 0,
+      "neutral": 1,
+      "unknown": 0
+    }
+  },
+  "positivePricingEvidenceIds": [
+    "fixture:praise-1",
+    "fixture:praise-2",
+    "fixture:praise-3"
+  ],
+  "excludedFromRelevance": [
+    "fixture:ambiguous-1",
+    "fixture:other-1",
+    "fixture:injection-1"
+  ],
+  "missingPublicationDate": ["fixture:undated-1"]
+}
