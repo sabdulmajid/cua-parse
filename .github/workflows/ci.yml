@@ -51,3 +51,20 @@ jobs:
       - run: npm run build
       - run: npm run secret-scan -- --history
       - run: npm run format:check
+      - run: npx playwright install --with-deps chromium
+      - name: Verify browser flow
+        run: |
+          npm start > .local/ci-server.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          node --input-type=module <<'JS'
+          for (let attempt = 0; attempt < 30; attempt++) {
+            try {
+              const response = await fetch(process.env.APP_BASE_URL + '/api/health');
+              if ((await response.json()).ok) process.exit(0);
+            } catch {}
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+          throw new Error('Local API did not become ready');
+          JS
+          npm run test:browser

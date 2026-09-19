@@ -7,14 +7,15 @@
     "node": ">=22.22.0"
   },
   "scripts": {
-    "dev": "tsx watch src/server/index.ts",
+    "dev": "concurrently -k \"tsx watch src/server/index.ts\" \"vite --host 127.0.0.1\"",
     "start": "tsx src/server/index.ts",
-    "build": "tsc --noEmit",
+    "build": "tsc --noEmit && vite build",
     "check": "tsc --noEmit && eslint .",
     "format": "prettier --write . --ignore-unknown",
     "format:check": "prettier --check . --ignore-unknown",
     "test": "vitest run --exclude 'tests/*.integration.test.ts' --exclude 'tests/*.browser.test.ts'",
     "test:integration": "vitest run tests/*.integration.test.ts",
+    "test:browser": "playwright test",
     "setup": "tsx scripts/setup.ts",
     "providers": "tsx scripts/providers.ts",
     "setup:voice": "tsx scripts/setup-voice.ts",
@@ -24,7 +25,10 @@
     "postinstall": "node scripts/runtime-check.cjs && npm rebuild better-sqlite3",
     "smoke:live-source": "tsx scripts/live-source-smoke.ts",
     "smoke:analysis": "tsx scripts/smoke-analysis.ts",
-    "smoke:live-analysis": "tsx scripts/live-source-smoke.ts --analyze"
+    "smoke:live-analysis": "tsx scripts/live-source-smoke.ts --analyze",
+    "smoke:conversation": "tsx scripts/smoke-conversation.ts",
+    "smoke:voice": "tsx scripts/smoke-voice.ts",
+    "smoke:live-conversation": "tsx scripts/smoke-live-conversation.ts"
   },
   "dependencies": {
     "@elastic/elasticsearch": "8.19.1",
