@@ -1,0 +1,51 @@
+# Local configuration
+
+Follow the root README to install the app. `.env.example` lists the settings. Store credentials in an ignored `.env` file. Never use frontend variables for credentials. The app binds to localhost and requires a local HTTP `APP_BASE_URL`.
+
+## Local evidence store
+
+`ELASTICSEARCH_URL` defaults to `http://127.0.0.1:9200`. Compose pins Elasticsearch 8.19.13 with a 2 GB memory cap. Security is disabled only for this localhost-bound development service. Use HTTPS and `ELASTICSEARCH_API_KEY` for an authenticated remote cluster.
+
+`npm run setup` creates local storage and checks the evidence index mapping. `npm run providers` checks configured providers without starting a model request or conversation. Missing credentials keep the relevant provider disabled or unverified.
+
+Use `ELASTICSEARCH_INDEX` with the `cua-parse-` prefix. The app creates immutable research snapshots there. `CUA_LOCAL_DIR` holds SQLite, the generated session secret, and agent ownership records. Preserve this directory when restarting. Interrupted research jobs fail explicitly after a restart.
+
+BM25 keyword search is the default. Optional hybrid search requires `RETRIEVAL_MODE=hybrid`, `OPENAI_API_KEY`, and a new dedicated index. It uses `text-embedding-3-small`. Set `OPENAI_EMBEDDING_DIMENSIONS` before creating that index. An incompatible mapping is rejected; embedding failure is reported as a keyword-search fallback.
+
+## ElevenLabs analyst
+
+Set `ELEVENLABS_API_KEY` and `VOICE_MODE=enabled`. Run `npm run setup:voice` to create or update a dedicated private agent and its four client tools. The key needs permission to read, create, and update the relevant Agents resources. The script does not change an account plan.
+
+The saved agent ID is not a key. Normal setup reads it from `.local/voice-agent.json`; manual `ELEVENLABS_AGENT_ID` entry is optional. Setup rejects unrelated agents. If creation times out, resolve the uncertain operation in the provider before removing its local marker or retrying. This prevents duplicate resources.
+
+Text uses the ElevenLabs conversation service without microphone access. Voice adds microphone input and audio output. Both use a signed WebSocket connection and session-bound local tools. When research finishes, the client sends one completion message to request the answer. **Read findings** retries the answer after a failed or replaced connection.
+
+Set `OPENAI_API_KEY` and `ANALYSIS_MODE=openai` for live feedback labels. Schema, identity, and source-span validation run before labels count as findings. Failed records remain available for inspection. No model key is needed for the synthetic demo.
+
+## Uploaded comments and Elastic Agent Builder
+
+The separate settings `ELASTIC_CLOUD_URL`, `ELASTIC_CLOUD_KIBANA_URL`, `ELASTIC_CLOUD_API_KEY`, and `ELASTIC_CLOUD_INDEX` connect an existing YouTube comment corpus. The first URL is the Elasticsearch HTTPS origin. The second is the Kibana HTTPS origin used by Agent Builder. The key needs index read access and Agent Builder access.
+
+The adapter expects comment text, author, publication date, engagement fields, video context, and uploaded sentiment, complaint, and category fields. See `src/server/elastic-cloud.ts` for mapping and aggregation details. The default index name is `youtube-product-comments`.
+
+The app reads counts and originals from Elasticsearch, verifies fixed-index ES|QL counts through Agent Builder, then asks the agent to select evidence. The explanation step has tools and Elastic capabilities disabled. The server renders verified source sentences and assigns citations. It does not write to the uploaded index or create remote agents.
+
+Questions have a 150-second provider deadline and no automatic retry. Local limits permit one active request per session, two globally, and 30 per hour. Completed request IDs can replay the same answer for 30 minutes. Model context is limited to 500 complete comments and 100,000 characters; counts still cover the full scope. Uploaded labels are metadata, not independently validated opinions.
+
+## Troubleshooting
+
+| Symptom                                   | Action                                                                            |
+| ----------------------------------------- | --------------------------------------------------------------------------------- |
+| Session loading failed                    | Use **Retry server connection**. Check that the API for this checkout is running. |
+| Elasticsearch unavailable                 | Start Docker and the Compose service, then rerun setup.                           |
+| Authentication or Agents permission error | Check the server-side key and provider permissions, then restart.                 |
+| Agent configuration error                 | Rerun voice setup and preserve its ownership file.                                |
+| No model labels                           | Check analysis mode, provider status, and the job's failed-record details.        |
+| Microphone blocked                        | Enable browser microphone access or use text mode.                                |
+| Wrong app receives requests               | Check the API URL and ports in the integration guide.                             |
+
+## Primary references
+
+- [ElevenLabs React SDK](https://elevenlabs.io/docs/eleven-agents/libraries/react) and [client tools](https://elevenlabs.io/docs/eleven-agents/customization/tools/client-tools).
+- [Elastic Agent Builder API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-agent-builder).
+- [HN API](https://github.com/HackerNews/API).
