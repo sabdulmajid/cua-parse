@@ -1,0 +1,1601 @@
+{
+  "schemaVersion": 1,
+  "synthetic": true,
+  "product": "AcmeFlow",
+  "question": "What do people dislike about AcmeFlow, especially its pricing and onboarding?",
+  "dominantThreadId": "fixture:angry",
+  "states": {
+    "overview": {
+      "snapshotVersion": 1,
+      "scopeVersion": "4a7fb741034745465ac607e6",
+      "question": "What do people dislike about AcmeFlow, especially its pricing and onboarding?",
+      "filters": {
+        "excludedThreadIds": [],
+        "aspect": null,
+        "source": null,
+        "from": null,
+        "to": null
+      },
+      "challenge": false,
+      "retrievalMode": "bm25",
+      "provenance": ["synthetic"],
+      "metrics": {
+        "collectedRecords": 21,
+        "scopedRecords": 21,
+        "relevantRecords": 18,
+        "distinctThreads": 9,
+        "aspectMentions": 24,
+        "aspects": [
+          {
+            "aspect": "pricing",
+            "mentions": 13,
+            "positive": 3,
+            "negative": 9,
+            "mixed": 0,
+            "neutral": 1,
+            "unknown": 0
+          },
+          {
+            "aspect": "onboarding",
+            "mentions": 4,
+            "positive": 2,
+            "negative": 2,
+            "mixed": 0,
+            "neutral": 0,
+            "unknown": 0
+          },
+          {
+            "aspect": "support",
+            "mentions": 3,
+            "positive": 1,
+            "negative": 2,
+            "mixed": 0,
+            "neutral": 0,
+            "unknown": 0
+          },
+          {
+            "aspect": "reliability",
+            "mentions": 2,
+            "positive": 1,
+            "negative": 1,
+            "mixed": 0,
+            "neutral": 0,
+            "unknown": 0
+          },
+          {
+            "aspect": "features",
+            "mentions": 2,
+            "positive": 2,
+            "negative": 0,
+            "mixed": 0,
+            "neutral": 0,
+            "unknown": 0
+          }
+        ],
+        "threads": [
+          {
+            "threadId": "fixture:angry",
+            "title": "AcmeFlow pricing change: a concentrated complaint thread",
+            "count": 8
+          },
+          {
+            "threadId": "fixture:praise",
+            "title": "AcmeFlow works for our small team",
+            "count": 3
+          },
+          {
+            "threadId": "fixture:mixed",
+            "title": "AcmeFlow: useful features with setup and price concerns",
+            "count": 2
+          },
+          {
+            "threadId": "fixture:reliability",
+            "title": "AcmeFlow reliability reports",
+            "count": 2
+          },
+          {
+            "threadId": "fixture:support",
+            "title": "AcmeFlow onboarding and support experiences",
+            "count": 2
+          },
+          {
+            "threadId": "fixture:ambiguity",
+            "title": "Which Flow product is this?",
+            "count": 1
+          },
+          {
+            "threadId": "fixture:injection",
+            "title": "Untrusted instructions in a discussion",
+            "count": 1
+          },
+          {
+            "threadId": "fixture:other",
+            "title": "OtherFlow feedback",
+            "count": 1
+          },
+          {
+            "threadId": "fixture:undated",
+            "title": "AcmeFlow plan question",
+            "count": 1
+          }
+        ]
+      },
+      "findings": [
+        {
+          "id": "4a7fb741034745465ac607e6-source-0",
+          "aspect": "pricing",
+          "text": "Pricing: “pricing is frustrating”",
+          "evidenceIds": ["fixture:angry-6"]
+        },
+        {
+          "id": "4a7fb741034745465ac607e6-source-1",
+          "aspect": "support",
+          "text": "Support: “support took a week to explain the invoice”",
+          "evidenceIds": ["fixture:angry-6"]
+        },
+        {
+          "id": "4a7fb741034745465ac607e6-source-2",
+          "aspect": "onboarding",
+          "text": "Onboarding: “The onboarding checklist is confusing.”",
+          "evidenceIds": ["fixture:angry-3"]
+        },
+        {
+          "id": "4a7fb741034745465ac607e6-source-3",
+          "aspect": "support",
+          "text": "Support: “support closed our question without an answer”",
+          "evidenceIds": ["fixture:support-1"]
+        }
+      ],
+      "evidence": [
+        {
+          "id": "fixture:praise-1",
+          "text": "AcmeFlow pricing is fair for our team, and onboarding took only ten minutes.",
+          "url": null,
+          "threadId": "fixture:praise",
+          "threadTitle": "AcmeFlow works for our small team",
+          "parentId": null,
+          "publishedAt": "2026-09-11T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "2d4d0f318bd70f2aff0d62de84b52b8044386afc6e543dc0966e9199c880ebd7",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "positive",
+              "quote": "pricing is fair for our team"
+            },
+            {
+              "aspect": "onboarding",
+              "sentiment": "positive",
+              "quote": "onboarding took only ten minutes"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow works for our small team\nAcmeFlow pricing is fair for our team, and onboarding took only ten minutes."
+        },
+        {
+          "id": "fixture:undated-1",
+          "text": "AcmeFlow lists monthly and annual pricing. Which plan includes exports?",
+          "url": null,
+          "threadId": "fixture:undated",
+          "threadTitle": "AcmeFlow plan question",
+          "parentId": null,
+          "publishedAt": null,
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "598239eb9fd647234c78c7621f0d4d54a60b4a5d7fd68697c8c212fb6f10d9bb",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "neutral",
+              "quote": "lists monthly and annual pricing"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow plan question\nAcmeFlow lists monthly and annual pricing. Which plan includes exports?"
+        },
+        {
+          "id": "fixture:angry-6",
+          "text": "AcmeFlow pricing is frustrating, and support took a week to explain the invoice.",
+          "url": null,
+          "threadId": "fixture:angry",
+          "threadTitle": "AcmeFlow pricing change: a concentrated complaint thread",
+          "parentId": "fixture:angry-1",
+          "publishedAt": "2026-09-06T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "741ac2b63ccd4c0f39cfeddcaeef4efe292bef2c8c9716574c1eb164022d53e0",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "negative",
+              "quote": "pricing is frustrating"
+            },
+            {
+              "aspect": "support",
+              "sentiment": "negative",
+              "quote": "support took a week to explain the invoice"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow pricing change: a concentrated complaint thread\nAcmeFlow pricing is frustrating, and support took a week to explain the invoice."
+        },
+        {
+          "id": "fixture:support-2",
+          "text": "The AcmeFlow onboarding guide made our first project easy to set up.",
+          "url": null,
+          "threadId": "fixture:support",
+          "threadTitle": "AcmeFlow onboarding and support experiences",
+          "parentId": null,
+          "publishedAt": "2026-09-17T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "98bb00c07998cda665dcf624b8549d832c4fa22061ed1267cdda2bfd0ddcde40",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "onboarding",
+              "sentiment": "positive",
+              "quote": "onboarding guide made our first project easy to set up"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow onboarding and support experiences\nThe AcmeFlow onboarding guide made our first project easy to set up."
+        },
+        {
+          "id": "fixture:angry-3",
+          "text": "AcmeFlow costs too much. The onboarding checklist is confusing.",
+          "url": null,
+          "threadId": "fixture:angry",
+          "threadTitle": "AcmeFlow pricing change: a concentrated complaint thread",
+          "parentId": "fixture:angry-1",
+          "publishedAt": "2026-09-03T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "44fb006d8fa5288c60dafb928bb2d31dfa12173eb611bc57a07b54e78cef41d7",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "negative",
+              "quote": "costs too much"
+            },
+            {
+              "aspect": "onboarding",
+              "sentiment": "negative",
+              "quote": "The onboarding checklist is confusing."
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow pricing change: a concentrated complaint thread\nAcmeFlow costs too much. The onboarding checklist is confusing."
+        },
+        {
+          "id": "fixture:support-1",
+          "text": "AcmeFlow support closed our question without an answer.",
+          "url": null,
+          "threadId": "fixture:support",
+          "threadTitle": "AcmeFlow onboarding and support experiences",
+          "parentId": null,
+          "publishedAt": "2026-09-16T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "ac7afe403868cb7f9d8d0587345483b06358004c0cbdd89d6ea1c7139f149439",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "support",
+              "sentiment": "negative",
+              "quote": "support closed our question without an answer"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow onboarding and support experiences\nAcmeFlow support closed our question without an answer."
+        },
+        {
+          "id": "fixture:mixed-2",
+          "text": "AcmeFlow automations save us hours. Onboarding took three confusing afternoons.",
+          "url": null,
+          "threadId": "fixture:mixed",
+          "threadTitle": "AcmeFlow: useful features with setup and price concerns",
+          "parentId": null,
+          "publishedAt": "2026-09-10T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "7109e78628f6438afc6472fabc0f913355b429b5037afe9d8aec201a0209c1f9",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "features",
+              "sentiment": "positive",
+              "quote": "automations save us hours"
+            },
+            {
+              "aspect": "onboarding",
+              "sentiment": "negative",
+              "quote": "Onboarding took three confusing afternoons."
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow: useful features with setup and price concerns\nAcmeFlow automations save us hours. Onboarding took three confusing afternoons."
+        },
+        {
+          "id": "fixture:mixed-1",
+          "text": "AcmeFlow search finds our documents quickly, but the pricing is too high.",
+          "url": null,
+          "threadId": "fixture:mixed",
+          "threadTitle": "AcmeFlow: useful features with setup and price concerns",
+          "parentId": null,
+          "publishedAt": "2026-09-09T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "cdbcb7a8b3fcdcebb80de75c0d2cd79cdba0b8498d826fd5a3ce3b43fa1bcf02",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "features",
+              "sentiment": "positive",
+              "quote": "search finds our documents quickly"
+            },
+            {
+              "aspect": "pricing",
+              "sentiment": "negative",
+              "quote": "the pricing is too high"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow: useful features with setup and price concerns\nAcmeFlow search finds our documents quickly, but the pricing is too high."
+        },
+        {
+          "id": "fixture:praise-3",
+          "text": "AcmeFlow pricing is affordable compared with the manual work it replaced.",
+          "url": null,
+          "threadId": "fixture:praise",
+          "threadTitle": "AcmeFlow works for our small team",
+          "parentId": null,
+          "publishedAt": "2026-09-13T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "55bb8d602f18e452210739866fcbd1477e4167e7cb7be6e193045721b3ee79c8",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "positive",
+              "quote": "pricing is affordable compared with the manual work it replaced"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow works for our small team\nAcmeFlow pricing is affordable compared with the manual work it replaced."
+        },
+        {
+          "id": "fixture:reliability-2",
+          "text": "AcmeFlow has been reliable throughout our six-week trial.",
+          "url": null,
+          "threadId": "fixture:reliability",
+          "threadTitle": "AcmeFlow reliability reports",
+          "parentId": null,
+          "publishedAt": "2026-09-15T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "314f850efa5d419c78e212c413d439b6042aef5c6f55a348bd0cbb1bd499a4b7",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "reliability",
+              "sentiment": "positive",
+              "quote": "has been reliable throughout our six-week trial"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow reliability reports\nAcmeFlow has been reliable throughout our six-week trial."
+        },
+        {
+          "id": "fixture:reliability-1",
+          "text": "AcmeFlow sync failed twice during our launch. Reliability needs work.",
+          "url": null,
+          "threadId": "fixture:reliability",
+          "threadTitle": "AcmeFlow reliability reports",
+          "parentId": null,
+          "publishedAt": "2026-09-14T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "55f9133e52803d5fb11a41168e90a1825673d5e113baba3b7594576c7a535b8d",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "reliability",
+              "sentiment": "negative",
+              "quote": "sync failed twice during our launch"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow reliability reports\nAcmeFlow sync failed twice during our launch. Reliability needs work."
+        },
+        {
+          "id": "fixture:angry-1",
+          "text": "AcmeFlow pricing is too high for our three-person team.",
+          "url": null,
+          "threadId": "fixture:angry",
+          "threadTitle": "AcmeFlow pricing change: a concentrated complaint thread",
+          "parentId": null,
+          "publishedAt": "2026-09-01T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "99c4960dd38cecd62ca8ac332c27bf6c83351b0445d1796219f925983d2bda27",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "negative",
+              "quote": "pricing is too high for our three-person team"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow pricing change: a concentrated complaint thread\nAcmeFlow pricing is too high for our three-person team."
+        },
+        {
+          "id": "fixture:angry-5",
+          "text": "We cannot fit the new AcmeFlow pricing into our small project budget.",
+          "url": null,
+          "threadId": "fixture:angry",
+          "threadTitle": "AcmeFlow pricing change: a concentrated complaint thread",
+          "parentId": "fixture:angry-1",
+          "publishedAt": "2026-09-05T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "d4f964a3eb86fb5acd84ead2b44bb35b087c5138ab1f417a692966be6b5d2b97",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "negative",
+              "quote": "cannot fit the new AcmeFlow pricing into our small project budget"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow pricing change: a concentrated complaint thread\nWe cannot fit the new AcmeFlow pricing into our small project budget."
+        },
+        {
+          "id": "fixture:angry-4",
+          "text": "AcmeFlow charges for every seat, including our occasional reviewers. That pricing feels expensive.",
+          "url": null,
+          "threadId": "fixture:angry",
+          "threadTitle": "AcmeFlow pricing change: a concentrated complaint thread",
+          "parentId": "fixture:angry-1",
+          "publishedAt": "2026-09-04T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "54eccd3678eab07fcabc7866c103c0273c4f6b5ededb684b50836a5b55815be4",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "negative",
+              "quote": "That pricing feels expensive."
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow pricing change: a concentrated complaint thread\nAcmeFlow charges for every seat, including our occasional reviewers. That pricing feels expensive."
+        },
+        {
+          "id": "fixture:angry-7",
+          "text": "AcmeFlow makes us upgrade for basic reporting; the pricing is poor value for us.",
+          "url": null,
+          "threadId": "fixture:angry",
+          "threadTitle": "AcmeFlow pricing change: a concentrated complaint thread",
+          "parentId": "fixture:angry-1",
+          "publishedAt": "2026-09-07T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "fc5faed01d6de4bfca666d0efd10370a98cc15c3b5ccc7a3a7e16f32b5f1b440",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "negative",
+              "quote": "the pricing is poor value for us"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow pricing change: a concentrated complaint thread\nAcmeFlow makes us upgrade for basic reporting; the pricing is poor value for us."
+        },
+        {
+          "id": "fixture:angry-2",
+          "text": "The AcmeFlow price increase made our monthly bill hard to justify.",
+          "url": null,
+          "threadId": "fixture:angry",
+          "threadTitle": "AcmeFlow pricing change: a concentrated complaint thread",
+          "parentId": "fixture:angry-1",
+          "publishedAt": "2026-09-02T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "8d73b2fb76da5921ab6c4c95cb354a96fed6f5af8f71020add89b5827f1c9747",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "negative",
+              "quote": "price increase made our monthly bill hard to justify"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow pricing change: a concentrated complaint thread\nThe AcmeFlow price increase made our monthly bill hard to justify."
+        },
+        {
+          "id": "fixture:angry-8",
+          "text": "The annual AcmeFlow price commitment is too expensive for our seasonal work.",
+          "url": null,
+          "threadId": "fixture:angry",
+          "threadTitle": "AcmeFlow pricing change: a concentrated complaint thread",
+          "parentId": "fixture:angry-1",
+          "publishedAt": "2026-09-08T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "cf6d286970580ffac2127143332796f35ae2e4e634151558dc67ddddb3ba4f54",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "negative",
+              "quote": "price commitment is too expensive for our seasonal work"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow pricing change: a concentrated complaint thread\nThe annual AcmeFlow price commitment is too expensive for our seasonal work."
+        }
+      ],
+      "opposingEvidence": [],
+      "limitations": [
+        "Counts describe this collected sample, not the market or verified customers.",
+        "Scoped records and thread counts include irrelevant records. Aspect mentions count labels on relevant records; one record can mention several aspects.",
+        "Examples are selected by relevance and thread diversity. Counts use all records in the selected scope.",
+        "This scope includes synthetic demonstration evidence.",
+        "1 scoped records have no publication date.",
+        "Semantic retrieval is not configured. BM25 keyword ranking is active."
+      ],
+      "spokenSummary": "This is a synthetic demonstration sample. The complaints in this sample concern pricing, support, onboarding. The source quotes below show the specific issues. Based on 18 relevant records across a sample of 9 discussions. These findings describe the collected sample only."
+    },
+    "pricing": {
+      "snapshotVersion": 1,
+      "scopeVersion": "772dc233645e313e1efd8f50",
+      "question": "What do people dislike about AcmeFlow, especially its pricing and onboarding?",
+      "filters": {
+        "excludedThreadIds": [],
+        "aspect": "pricing",
+        "source": null,
+        "from": null,
+        "to": null
+      },
+      "challenge": false,
+      "retrievalMode": "bm25",
+      "provenance": ["synthetic"],
+      "metrics": {
+        "collectedRecords": 21,
+        "scopedRecords": 13,
+        "relevantRecords": 13,
+        "distinctThreads": 4,
+        "aspectMentions": 13,
+        "aspects": [
+          {
+            "aspect": "pricing",
+            "mentions": 13,
+            "positive": 3,
+            "negative": 9,
+            "mixed": 0,
+            "neutral": 1,
+            "unknown": 0
+          }
+        ],
+        "threads": [
+          {
+            "threadId": "fixture:angry",
+            "title": "AcmeFlow pricing change: a concentrated complaint thread",
+            "count": 8
+          },
+          {
+            "threadId": "fixture:praise",
+            "title": "AcmeFlow works for our small team",
+            "count": 3
+          },
+          {
+            "threadId": "fixture:mixed",
+            "title": "AcmeFlow: useful features with setup and price concerns",
+            "count": 1
+          },
+          {
+            "threadId": "fixture:undated",
+            "title": "AcmeFlow plan question",
+            "count": 1
+          }
+        ]
+      },
+      "findings": [
+        {
+          "id": "772dc233645e313e1efd8f50-source-0",
+          "aspect": "pricing",
+          "text": "Pricing: “pricing is frustrating”",
+          "evidenceIds": ["fixture:angry-6"]
+        },
+        {
+          "id": "772dc233645e313e1efd8f50-source-1",
+          "aspect": "pricing",
+          "text": "Pricing: “the pricing is too high”",
+          "evidenceIds": ["fixture:mixed-1"]
+        },
+        {
+          "id": "772dc233645e313e1efd8f50-source-2",
+          "aspect": "pricing",
+          "text": "Pricing: “costs too much”",
+          "evidenceIds": ["fixture:angry-3"]
+        },
+        {
+          "id": "772dc233645e313e1efd8f50-source-3",
+          "aspect": "pricing",
+          "text": "Pricing: “pricing is too high for our three-person team”",
+          "evidenceIds": ["fixture:angry-1"]
+        }
+      ],
+      "evidence": [
+        {
+          "id": "fixture:praise-1",
+          "text": "AcmeFlow pricing is fair for our team, and onboarding took only ten minutes.",
+          "url": null,
+          "threadId": "fixture:praise",
+          "threadTitle": "AcmeFlow works for our small team",
+          "parentId": null,
+          "publishedAt": "2026-09-11T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "2d4d0f318bd70f2aff0d62de84b52b8044386afc6e543dc0966e9199c880ebd7",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "positive",
+              "quote": "pricing is fair for our team"
+            },
+            {
+              "aspect": "onboarding",
+              "sentiment": "positive",
+              "quote": "onboarding took only ten minutes"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow works for our small team\nAcmeFlow pricing is fair for our team, and onboarding took only ten minutes."
+        },
+        {
+          "id": "fixture:undated-1",
+          "text": "AcmeFlow lists monthly and annual pricing. Which plan includes exports?",
+          "url": null,
+          "threadId": "fixture:undated",
+          "threadTitle": "AcmeFlow plan question",
+          "parentId": null,
+          "publishedAt": null,
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "598239eb9fd647234c78c7621f0d4d54a60b4a5d7fd68697c8c212fb6f10d9bb",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "neutral",
+              "quote": "lists monthly and annual pricing"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow plan question\nAcmeFlow lists monthly and annual pricing. Which plan includes exports?"
+        },
+        {
+          "id": "fixture:angry-6",
+          "text": "AcmeFlow pricing is frustrating, and support took a week to explain the invoice.",
+          "url": null,
+          "threadId": "fixture:angry",
+          "threadTitle": "AcmeFlow pricing change: a concentrated complaint thread",
+          "parentId": "fixture:angry-1",
+          "publishedAt": "2026-09-06T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "741ac2b63ccd4c0f39cfeddcaeef4efe292bef2c8c9716574c1eb164022d53e0",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "negative",
+              "quote": "pricing is frustrating"
+            },
+            {
+              "aspect": "support",
+              "sentiment": "negative",
+              "quote": "support took a week to explain the invoice"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow pricing change: a concentrated complaint thread\nAcmeFlow pricing is frustrating, and support took a week to explain the invoice."
+        },
+        {
+          "id": "fixture:angry-3",
+          "text": "AcmeFlow costs too much. The onboarding checklist is confusing.",
+          "url": null,
+          "threadId": "fixture:angry",
+          "threadTitle": "AcmeFlow pricing change: a concentrated complaint thread",
+          "parentId": "fixture:angry-1",
+          "publishedAt": "2026-09-03T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "44fb006d8fa5288c60dafb928bb2d31dfa12173eb611bc57a07b54e78cef41d7",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "negative",
+              "quote": "costs too much"
+            },
+            {
+              "aspect": "onboarding",
+              "sentiment": "negative",
+              "quote": "The onboarding checklist is confusing."
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow pricing change: a concentrated complaint thread\nAcmeFlow costs too much. The onboarding checklist is confusing."
+        },
+        {
+          "id": "fixture:mixed-1",
+          "text": "AcmeFlow search finds our documents quickly, but the pricing is too high.",
+          "url": null,
+          "threadId": "fixture:mixed",
+          "threadTitle": "AcmeFlow: useful features with setup and price concerns",
+          "parentId": null,
+          "publishedAt": "2026-09-09T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "cdbcb7a8b3fcdcebb80de75c0d2cd79cdba0b8498d826fd5a3ce3b43fa1bcf02",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "features",
+              "sentiment": "positive",
+              "quote": "search finds our documents quickly"
+            },
+            {
+              "aspect": "pricing",
+              "sentiment": "negative",
+              "quote": "the pricing is too high"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow: useful features with setup and price concerns\nAcmeFlow search finds our documents quickly, but the pricing is too high."
+        },
+        {
+          "id": "fixture:praise-3",
+          "text": "AcmeFlow pricing is affordable compared with the manual work it replaced.",
+          "url": null,
+          "threadId": "fixture:praise",
+          "threadTitle": "AcmeFlow works for our small team",
+          "parentId": null,
+          "publishedAt": "2026-09-13T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "55bb8d602f18e452210739866fcbd1477e4167e7cb7be6e193045721b3ee79c8",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "positive",
+              "quote": "pricing is affordable compared with the manual work it replaced"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow works for our small team\nAcmeFlow pricing is affordable compared with the manual work it replaced."
+        },
+        {
+          "id": "fixture:angry-1",
+          "text": "AcmeFlow pricing is too high for our three-person team.",
+          "url": null,
+          "threadId": "fixture:angry",
+          "threadTitle": "AcmeFlow pricing change: a concentrated complaint thread",
+          "parentId": null,
+          "publishedAt": "2026-09-01T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "99c4960dd38cecd62ca8ac332c27bf6c83351b0445d1796219f925983d2bda27",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "negative",
+              "quote": "pricing is too high for our three-person team"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow pricing change: a concentrated complaint thread\nAcmeFlow pricing is too high for our three-person team."
+        },
+        {
+          "id": "fixture:angry-5",
+          "text": "We cannot fit the new AcmeFlow pricing into our small project budget.",
+          "url": null,
+          "threadId": "fixture:angry",
+          "threadTitle": "AcmeFlow pricing change: a concentrated complaint thread",
+          "parentId": "fixture:angry-1",
+          "publishedAt": "2026-09-05T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "d4f964a3eb86fb5acd84ead2b44bb35b087c5138ab1f417a692966be6b5d2b97",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "negative",
+              "quote": "cannot fit the new AcmeFlow pricing into our small project budget"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow pricing change: a concentrated complaint thread\nWe cannot fit the new AcmeFlow pricing into our small project budget."
+        },
+        {
+          "id": "fixture:angry-4",
+          "text": "AcmeFlow charges for every seat, including our occasional reviewers. That pricing feels expensive.",
+          "url": null,
+          "threadId": "fixture:angry",
+          "threadTitle": "AcmeFlow pricing change: a concentrated complaint thread",
+          "parentId": "fixture:angry-1",
+          "publishedAt": "2026-09-04T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "54eccd3678eab07fcabc7866c103c0273c4f6b5ededb684b50836a5b55815be4",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "negative",
+              "quote": "That pricing feels expensive."
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow pricing change: a concentrated complaint thread\nAcmeFlow charges for every seat, including our occasional reviewers. That pricing feels expensive."
+        },
+        {
+          "id": "fixture:angry-7",
+          "text": "AcmeFlow makes us upgrade for basic reporting; the pricing is poor value for us.",
+          "url": null,
+          "threadId": "fixture:angry",
+          "threadTitle": "AcmeFlow pricing change: a concentrated complaint thread",
+          "parentId": "fixture:angry-1",
+          "publishedAt": "2026-09-07T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "fc5faed01d6de4bfca666d0efd10370a98cc15c3b5ccc7a3a7e16f32b5f1b440",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "negative",
+              "quote": "the pricing is poor value for us"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow pricing change: a concentrated complaint thread\nAcmeFlow makes us upgrade for basic reporting; the pricing is poor value for us."
+        },
+        {
+          "id": "fixture:angry-2",
+          "text": "The AcmeFlow price increase made our monthly bill hard to justify.",
+          "url": null,
+          "threadId": "fixture:angry",
+          "threadTitle": "AcmeFlow pricing change: a concentrated complaint thread",
+          "parentId": "fixture:angry-1",
+          "publishedAt": "2026-09-02T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "8d73b2fb76da5921ab6c4c95cb354a96fed6f5af8f71020add89b5827f1c9747",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "negative",
+              "quote": "price increase made our monthly bill hard to justify"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow pricing change: a concentrated complaint thread\nThe AcmeFlow price increase made our monthly bill hard to justify."
+        },
+        {
+          "id": "fixture:angry-8",
+          "text": "The annual AcmeFlow price commitment is too expensive for our seasonal work.",
+          "url": null,
+          "threadId": "fixture:angry",
+          "threadTitle": "AcmeFlow pricing change: a concentrated complaint thread",
+          "parentId": "fixture:angry-1",
+          "publishedAt": "2026-09-08T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "cf6d286970580ffac2127143332796f35ae2e4e634151558dc67ddddb3ba4f54",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "negative",
+              "quote": "price commitment is too expensive for our seasonal work"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow pricing change: a concentrated complaint thread\nThe annual AcmeFlow price commitment is too expensive for our seasonal work."
+        }
+      ],
+      "opposingEvidence": [],
+      "limitations": [
+        "Counts describe this collected sample, not the market or verified customers.",
+        "Scoped records and thread counts include irrelevant records. Aspect mentions count labels on relevant records; one record can mention several aspects.",
+        "Examples are selected by relevance and thread diversity. Counts use all records in the selected scope.",
+        "This scope includes synthetic demonstration evidence.",
+        "1 scoped records have no publication date.",
+        "Semantic retrieval is not configured. BM25 keyword ranking is active."
+      ],
+      "spokenSummary": "This is a synthetic demonstration sample. The complaints in this sample concern pricing. The source quotes below show the specific issues. Based on 13 relevant records across a sample of 4 discussions. One discussion supplies 8 of the 13 records. These findings describe the collected sample only."
+    },
+    "excluded": {
+      "snapshotVersion": 1,
+      "scopeVersion": "e929228ff1b7f85ffcb70dad",
+      "question": "What do people dislike about AcmeFlow, especially its pricing and onboarding?",
+      "filters": {
+        "excludedThreadIds": ["fixture:angry"],
+        "aspect": "pricing",
+        "source": null,
+        "from": null,
+        "to": null
+      },
+      "challenge": false,
+      "retrievalMode": "bm25",
+      "provenance": ["synthetic"],
+      "metrics": {
+        "collectedRecords": 21,
+        "scopedRecords": 5,
+        "relevantRecords": 5,
+        "distinctThreads": 3,
+        "aspectMentions": 5,
+        "aspects": [
+          {
+            "aspect": "pricing",
+            "mentions": 5,
+            "positive": 3,
+            "negative": 1,
+            "mixed": 0,
+            "neutral": 1,
+            "unknown": 0
+          }
+        ],
+        "threads": [
+          {
+            "threadId": "fixture:praise",
+            "title": "AcmeFlow works for our small team",
+            "count": 3
+          },
+          {
+            "threadId": "fixture:mixed",
+            "title": "AcmeFlow: useful features with setup and price concerns",
+            "count": 1
+          },
+          {
+            "threadId": "fixture:undated",
+            "title": "AcmeFlow plan question",
+            "count": 1
+          }
+        ]
+      },
+      "findings": [
+        {
+          "id": "e929228ff1b7f85ffcb70dad-source-0",
+          "aspect": "pricing",
+          "text": "Pricing: “the pricing is too high”",
+          "evidenceIds": ["fixture:mixed-1"]
+        }
+      ],
+      "evidence": [
+        {
+          "id": "fixture:praise-1",
+          "text": "AcmeFlow pricing is fair for our team, and onboarding took only ten minutes.",
+          "url": null,
+          "threadId": "fixture:praise",
+          "threadTitle": "AcmeFlow works for our small team",
+          "parentId": null,
+          "publishedAt": "2026-09-11T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "2d4d0f318bd70f2aff0d62de84b52b8044386afc6e543dc0966e9199c880ebd7",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "positive",
+              "quote": "pricing is fair for our team"
+            },
+            {
+              "aspect": "onboarding",
+              "sentiment": "positive",
+              "quote": "onboarding took only ten minutes"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow works for our small team\nAcmeFlow pricing is fair for our team, and onboarding took only ten minutes."
+        },
+        {
+          "id": "fixture:undated-1",
+          "text": "AcmeFlow lists monthly and annual pricing. Which plan includes exports?",
+          "url": null,
+          "threadId": "fixture:undated",
+          "threadTitle": "AcmeFlow plan question",
+          "parentId": null,
+          "publishedAt": null,
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "598239eb9fd647234c78c7621f0d4d54a60b4a5d7fd68697c8c212fb6f10d9bb",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "neutral",
+              "quote": "lists monthly and annual pricing"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow plan question\nAcmeFlow lists monthly and annual pricing. Which plan includes exports?"
+        },
+        {
+          "id": "fixture:mixed-1",
+          "text": "AcmeFlow search finds our documents quickly, but the pricing is too high.",
+          "url": null,
+          "threadId": "fixture:mixed",
+          "threadTitle": "AcmeFlow: useful features with setup and price concerns",
+          "parentId": null,
+          "publishedAt": "2026-09-09T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "cdbcb7a8b3fcdcebb80de75c0d2cd79cdba0b8498d826fd5a3ce3b43fa1bcf02",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "features",
+              "sentiment": "positive",
+              "quote": "search finds our documents quickly"
+            },
+            {
+              "aspect": "pricing",
+              "sentiment": "negative",
+              "quote": "the pricing is too high"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow: useful features with setup and price concerns\nAcmeFlow search finds our documents quickly, but the pricing is too high."
+        },
+        {
+          "id": "fixture:praise-3",
+          "text": "AcmeFlow pricing is affordable compared with the manual work it replaced.",
+          "url": null,
+          "threadId": "fixture:praise",
+          "threadTitle": "AcmeFlow works for our small team",
+          "parentId": null,
+          "publishedAt": "2026-09-13T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "55bb8d602f18e452210739866fcbd1477e4167e7cb7be6e193045721b3ee79c8",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "positive",
+              "quote": "pricing is affordable compared with the manual work it replaced"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow works for our small team\nAcmeFlow pricing is affordable compared with the manual work it replaced."
+        },
+        {
+          "id": "fixture:praise-2",
+          "text": "The AcmeFlow price is good value. Support answered our billing question the same day.",
+          "url": null,
+          "threadId": "fixture:praise",
+          "threadTitle": "AcmeFlow works for our small team",
+          "parentId": null,
+          "publishedAt": "2026-09-12T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "124b8b18964219493e18ac11db3d86a25b2bde14a3025ff8b1afb1ca3dcebfef",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "positive",
+              "quote": "price is good value"
+            },
+            {
+              "aspect": "support",
+              "sentiment": "positive",
+              "quote": "Support answered our billing question the same day."
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow works for our small team\nThe AcmeFlow price is good value. Support answered our billing question the same day."
+        }
+      ],
+      "opposingEvidence": [],
+      "limitations": [
+        "Counts describe this collected sample, not the market or verified customers.",
+        "Scoped records and thread counts include irrelevant records. Aspect mentions count labels on relevant records; one record can mention several aspects.",
+        "Examples are selected by relevance and thread diversity. Counts use all records in the selected scope.",
+        "This scope includes synthetic demonstration evidence.",
+        "1 scoped records have no publication date.",
+        "Semantic retrieval is not configured. BM25 keyword ranking is active."
+      ],
+      "spokenSummary": "This is a synthetic demonstration sample. The complaints in this sample concern pricing. The source quotes below show the specific issues. Based on 5 relevant records across a sample of 3 discussions. One discussion supplies 3 of the 5 records. These findings describe the collected sample only."
+    },
+    "challenge": {
+      "snapshotVersion": 1,
+      "scopeVersion": "e929228ff1b7f85ffcb70dad",
+      "question": "What do people dislike about AcmeFlow, especially its pricing and onboarding?",
+      "filters": {
+        "excludedThreadIds": ["fixture:angry"],
+        "aspect": "pricing",
+        "source": null,
+        "from": null,
+        "to": null
+      },
+      "challenge": true,
+      "retrievalMode": "bm25",
+      "provenance": ["synthetic"],
+      "metrics": {
+        "collectedRecords": 21,
+        "scopedRecords": 5,
+        "relevantRecords": 5,
+        "distinctThreads": 3,
+        "aspectMentions": 5,
+        "aspects": [
+          {
+            "aspect": "pricing",
+            "mentions": 5,
+            "positive": 3,
+            "negative": 1,
+            "mixed": 0,
+            "neutral": 1,
+            "unknown": 0
+          }
+        ],
+        "threads": [
+          {
+            "threadId": "fixture:praise",
+            "title": "AcmeFlow works for our small team",
+            "count": 3
+          },
+          {
+            "threadId": "fixture:mixed",
+            "title": "AcmeFlow: useful features with setup and price concerns",
+            "count": 1
+          },
+          {
+            "threadId": "fixture:undated",
+            "title": "AcmeFlow plan question",
+            "count": 1
+          }
+        ]
+      },
+      "findings": [
+        {
+          "id": "e929228ff1b7f85ffcb70dad-source-0",
+          "aspect": "pricing",
+          "text": "Pricing: “pricing is fair for our team”",
+          "evidenceIds": ["fixture:praise-1"]
+        },
+        {
+          "id": "e929228ff1b7f85ffcb70dad-source-1",
+          "aspect": "pricing",
+          "text": "Pricing: “pricing is affordable compared with the manual work it replaced”",
+          "evidenceIds": ["fixture:praise-3"]
+        },
+        {
+          "id": "e929228ff1b7f85ffcb70dad-source-2",
+          "aspect": "pricing",
+          "text": "Pricing: “price is good value”",
+          "evidenceIds": ["fixture:praise-2"]
+        }
+      ],
+      "evidence": [
+        {
+          "id": "fixture:praise-1",
+          "text": "AcmeFlow pricing is fair for our team, and onboarding took only ten minutes.",
+          "url": null,
+          "threadId": "fixture:praise",
+          "threadTitle": "AcmeFlow works for our small team",
+          "parentId": null,
+          "publishedAt": "2026-09-11T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "2d4d0f318bd70f2aff0d62de84b52b8044386afc6e543dc0966e9199c880ebd7",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "positive",
+              "quote": "pricing is fair for our team"
+            },
+            {
+              "aspect": "onboarding",
+              "sentiment": "positive",
+              "quote": "onboarding took only ten minutes"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow works for our small team\nAcmeFlow pricing is fair for our team, and onboarding took only ten minutes."
+        },
+        {
+          "id": "fixture:undated-1",
+          "text": "AcmeFlow lists monthly and annual pricing. Which plan includes exports?",
+          "url": null,
+          "threadId": "fixture:undated",
+          "threadTitle": "AcmeFlow plan question",
+          "parentId": null,
+          "publishedAt": null,
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "598239eb9fd647234c78c7621f0d4d54a60b4a5d7fd68697c8c212fb6f10d9bb",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "neutral",
+              "quote": "lists monthly and annual pricing"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow plan question\nAcmeFlow lists monthly and annual pricing. Which plan includes exports?"
+        },
+        {
+          "id": "fixture:mixed-1",
+          "text": "AcmeFlow search finds our documents quickly, but the pricing is too high.",
+          "url": null,
+          "threadId": "fixture:mixed",
+          "threadTitle": "AcmeFlow: useful features with setup and price concerns",
+          "parentId": null,
+          "publishedAt": "2026-09-09T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "cdbcb7a8b3fcdcebb80de75c0d2cd79cdba0b8498d826fd5a3ce3b43fa1bcf02",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "features",
+              "sentiment": "positive",
+              "quote": "search finds our documents quickly"
+            },
+            {
+              "aspect": "pricing",
+              "sentiment": "negative",
+              "quote": "the pricing is too high"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow: useful features with setup and price concerns\nAcmeFlow search finds our documents quickly, but the pricing is too high."
+        },
+        {
+          "id": "fixture:praise-3",
+          "text": "AcmeFlow pricing is affordable compared with the manual work it replaced.",
+          "url": null,
+          "threadId": "fixture:praise",
+          "threadTitle": "AcmeFlow works for our small team",
+          "parentId": null,
+          "publishedAt": "2026-09-13T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "55bb8d602f18e452210739866fcbd1477e4167e7cb7be6e193045721b3ee79c8",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "positive",
+              "quote": "pricing is affordable compared with the manual work it replaced"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow works for our small team\nAcmeFlow pricing is affordable compared with the manual work it replaced."
+        },
+        {
+          "id": "fixture:praise-2",
+          "text": "The AcmeFlow price is good value. Support answered our billing question the same day.",
+          "url": null,
+          "threadId": "fixture:praise",
+          "threadTitle": "AcmeFlow works for our small team",
+          "parentId": null,
+          "publishedAt": "2026-09-12T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "124b8b18964219493e18ac11db3d86a25b2bde14a3025ff8b1afb1ca3dcebfef",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "positive",
+              "quote": "price is good value"
+            },
+            {
+              "aspect": "support",
+              "sentiment": "positive",
+              "quote": "Support answered our billing question the same day."
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow works for our small team\nThe AcmeFlow price is good value. Support answered our billing question the same day."
+        }
+      ],
+      "opposingEvidence": [
+        {
+          "id": "fixture:praise-1",
+          "text": "AcmeFlow pricing is fair for our team, and onboarding took only ten minutes.",
+          "url": null,
+          "threadId": "fixture:praise",
+          "threadTitle": "AcmeFlow works for our small team",
+          "parentId": null,
+          "publishedAt": "2026-09-11T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "2d4d0f318bd70f2aff0d62de84b52b8044386afc6e543dc0966e9199c880ebd7",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "positive",
+              "quote": "pricing is fair for our team"
+            },
+            {
+              "aspect": "onboarding",
+              "sentiment": "positive",
+              "quote": "onboarding took only ten minutes"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow works for our small team\nAcmeFlow pricing is fair for our team, and onboarding took only ten minutes."
+        },
+        {
+          "id": "fixture:praise-3",
+          "text": "AcmeFlow pricing is affordable compared with the manual work it replaced.",
+          "url": null,
+          "threadId": "fixture:praise",
+          "threadTitle": "AcmeFlow works for our small team",
+          "parentId": null,
+          "publishedAt": "2026-09-13T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "55bb8d602f18e452210739866fcbd1477e4167e7cb7be6e193045721b3ee79c8",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "positive",
+              "quote": "pricing is affordable compared with the manual work it replaced"
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow works for our small team\nAcmeFlow pricing is affordable compared with the manual work it replaced."
+        },
+        {
+          "id": "fixture:praise-2",
+          "text": "The AcmeFlow price is good value. Support answered our billing question the same day.",
+          "url": null,
+          "threadId": "fixture:praise",
+          "threadTitle": "AcmeFlow works for our small team",
+          "parentId": null,
+          "publishedAt": "2026-09-12T10:00:00.000Z",
+          "collectedAt": "2026-09-19T12:00:00.000Z",
+          "source": "fixture",
+          "provenance": "synthetic",
+          "snapshotVersion": 1,
+          "contentHash": "124b8b18964219493e18ac11db3d86a25b2bde14a3025ff8b1afb1ca3dcebfef",
+          "relevant": true,
+          "productIdentity": "match",
+          "aspects": [
+            {
+              "aspect": "pricing",
+              "sentiment": "positive",
+              "quote": "price is good value"
+            },
+            {
+              "aspect": "support",
+              "sentiment": "positive",
+              "quote": "Support answered our billing question the same day."
+            }
+          ],
+          "analysisVersion": "synthetic-acmeflow-v1",
+          "extractionStatus": "verified",
+          "contextualText": "AcmeFlow works for our small team\nThe AcmeFlow price is good value. Support answered our billing question the same day."
+        }
+      ],
+      "limitations": [
+        "Counts describe this collected sample, not the market or verified customers.",
+        "Scoped records and thread counts include irrelevant records. Aspect mentions count labels on relevant records; one record can mention several aspects.",
+        "Examples are selected by relevance and thread diversity. Counts use all records in the selected scope.",
+        "This scope includes synthetic demonstration evidence.",
+        "1 scoped records have no publication date.",
+        "Semantic retrieval is not configured. BM25 keyword ranking is active."
+      ],
+      "spokenSummary": "This is a synthetic demonstration sample. The opposing examples concern pricing. Read the source quotes below. Based on 5 relevant records across a sample of 3 discussions. One discussion supplies 3 of the 5 records. These findings describe the collected sample only."
+    }
+  },
+  "briefs": {
+    "challenge": "# AcmeFlow — decision brief\n\nQuestion: What do people dislike about AcmeFlow, especially its pricing and onboarding?\nEvidence snapshot: 1; scope: e929228ff1b7f85ffcb70dad\nData: synthetic. Retrieval: bm25.\n\n## Scope and sample\nCollected records after deduplication: 21. Scoped records: 5. Relevant records: 5. Distinct scoped threads: 3.\nExcluded threads: fixture:angry. Aspect: pricing. Source: all. Dates: unbounded to unbounded.\n\n## Observations\n- Pricing: “pricing is fair for our team” Citations: fixture:praise-1\n- Pricing: “pricing is affordable compared with the manual work it replaced” Citations: fixture:praise-3\n- Pricing: “price is good value” Citations: fixture:praise-2\n\n## Opposing evidence\n- fixture:praise-1: pricing is fair for our team\n- fixture:praise-3: pricing is affordable compared with the manual work it replaced\n- fixture:praise-2: price is good value\n\n## Proposed next steps (recommendations)\n- Investigate pricing with a small user interview or product experiment. Check the cited records (fixture:praise-1) and test the opposite explanation before a product change.\n- Investigate pricing with a small user interview or product experiment. Check the cited records (fixture:praise-3) and test the opposite explanation before a product change.\n- Investigate pricing with a small user interview or product experiment. Check the cited records (fixture:praise-2) and test the opposite explanation before a product change.\n- Check concentration by thread and repeat the analysis after excluding the largest thread.\n- Confirm findings with independent customer research. Comments are not verified customers.\n\n## Evidence\n### fixture:praise-1\nSource: fixture; synthetic. Thread: AcmeFlow works for our small team (fixture:praise).\nPublished: 2026-09-11T10:00:00.000Z; collected: 2026-09-19T12:00:00.000Z.\nSynthetic evidence; no original public URL.\n> AcmeFlow pricing is fair for our team, and onboarding took only ten minutes.\n\n### fixture:undated-1\nSource: fixture; synthetic. Thread: AcmeFlow plan question (fixture:undated).\nPublished: unknown; collected: 2026-09-19T12:00:00.000Z.\nSynthetic evidence; no original public URL.\n> AcmeFlow lists monthly and annual pricing. Which plan includes exports?\n\n### fixture:mixed-1\nSource: fixture; synthetic. Thread: AcmeFlow: useful features with setup and price concerns (fixture:mixed).\nPublished: 2026-09-09T10:00:00.000Z; collected: 2026-09-19T12:00:00.000Z.\nSynthetic evidence; no original public URL.\n> AcmeFlow search finds our documents quickly, but the pricing is too high.\n\n### fixture:praise-3\nSource: fixture; synthetic. Thread: AcmeFlow works for our small team (fixture:praise).\nPublished: 2026-09-13T10:00:00.000Z; collected: 2026-09-19T12:00:00.000Z.\nSynthetic evidence; no original public URL.\n> AcmeFlow pricing is affordable compared with the manual work it replaced.\n\n### fixture:praise-2\nSource: fixture; synthetic. Thread: AcmeFlow works for our small team (fixture:praise).\nPublished: 2026-09-12T10:00:00.000Z; collected: 2026-09-19T12:00:00.000Z.\nSynthetic evidence; no original public URL.\n> The AcmeFlow price is good value. Support answered our billing question the same day.\n\n## Limitations\n- Counts describe this collected sample, not the market or verified customers.\n- Scoped records and thread counts include irrelevant records. Aspect mentions count labels on relevant records; one record can mention several aspects.\n- Examples are selected by relevance and thread diversity. Counts use all records in the selected scope.\n- This scope includes synthetic demonstration evidence.\n- 1 scoped records have no publication date.\n- Semantic retrieval is not configured. BM25 keyword ranking is active.\n\nThis is a saved draft/export. No external ticket was created."
+  },
+  "provenance": {
+    "fixtureVersion": "synthetic-acmeflow-v1",
+    "method": "Captured from the real built app and its local API using SQLite and Elasticsearch 8.19.x.",
+    "labels": "Hand-authored synthetic fixture labels; no customer or model claim.",
+    "publicSourceUrls": false,
+    "paidProviderCalls": 0,
+    "transformations": [
+      "Removed runtime session, research, request and generated-time fields.",
+      "Replaced runtime scope/finding IDs with deterministic presentation IDs derived from fixture version and filters.",
+      "Preserved API metrics, source IDs, quotations, findings text, filters, and limitations."
+    ]
+  }
+}
