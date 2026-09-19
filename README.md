@@ -1,42 +1,38 @@
 # CUA Parse
 
-CUA Parse connects product research questions to original feedback and scoped evidence counts. Type or speak to an ElevenLabs analyst, inspect its sources, and exclude a large discussion to see how the findings change.
+[![Verification](https://github.com/sabdulmajid/cua-parse/actions/workflows/ci.yml/badge.svg)](https://github.com/sabdulmajid/cua-parse/actions/workflows/ci.yml)
 
-For an existing YouTube feedback index, choose **YouTube comments · Elastic**, select a product, and ask a question such as “What do people dislike about Microsoft Teams?” Elasticsearch calculates the counts. Elastic Agent Builder selects supporting source passages. The app verifies each passage against the original comment and assigns its citation.
+**Turn scattered product feedback into findings you can inspect.**
 
-## Run locally
+One large complaint thread can dominate a product summary. CUA Parse connects each finding to original feedback, shows how much evidence supports it, and lets you remove that thread to see what changes.
 
-Use Node.js 22.22 or later, npm, and Docker. Elasticsearch needs about 2 GB of memory.
+[**Explore the guided demo →**](https://cua-parse-demo.vercel.app/) · [Watch the 60-second walkthrough](https://cua-parse-demo.vercel.app/#walkthrough)
 
-```sh
-git clone https://github.com/sabdulmajid/cua-parse.git
-cd cua-parse
-npm ci
-cp .env.example .env
-docker compose up -d --wait
-npm run setup
-npm run build
-npm start
-```
+[![CUA Parse research workspace: inspect feedback, change scope, and check the sources](showcase/assets/preview.gif)](https://cua-parse-demo.vercel.app/)
 
-Open [localhost:3000](http://127.0.0.1:3000). Select **Try demo** for synthetic AcmeFlow feedback. This path uses real SQLite and Elasticsearch but needs no provider keys. Stop Elasticsearch with `docker compose stop` to preserve its data.
+The guided sample uses **synthetic AcmeFlow feedback**. Its saved results come from the working research app. The walkthrough records that app; the hosted sample lets you explore those results without a live provider connection.
 
-For development, use `npm run dev` and open [localhost:5173](http://127.0.0.1:5173). Run one API process per local database. The app supports local use only.
+## Follow the evidence
 
-## Enable providers
+Ask about pricing and onboarding. Open a citation. Exclude the largest complaint thread. Check whether the remaining feedback changes the conclusion. Then challenge it with actual opposing evidence and export the current brief.
 
-Store keys only in the ignored `.env` file. Restart the API after changes.
+The sample makes the effect visible: negative pricing mentions fall from **9 of 13** to **1 of 5** after one discussion is excluded. These are facts about the invented sample, not customer research results. [Read the case study](docs/PRODUCT.md).
 
-- **ElevenLabs text and voice:** set `ELEVENLABS_API_KEY` and `VOICE_MODE=enabled`, then run `npm run setup:voice`. Setup creates a dedicated private agent and saves its ID locally. The agent ID is an identifier, not a second key.
-- **Live feedback analysis:** set `OPENAI_API_KEY` and `ANALYSIS_MODE=openai`. Without this, live and imported records remain unlabelled. Fixture labels are always synthetic.
-- **Uploaded Elastic corpus:** copy the four `ELASTIC_CLOUD_*` settings from `.env.example` into your ignored `.env` and enter their values there. This is a separate, read-only source. It uses direct typed questions. The live discussion source supports ElevenLabs text and voice.
+## What the working app supports
 
-See [setup](docs/SETUP.md) for configuration, [integration](docs/INTEGRATION.md) for reuse in another frontend, and [verification](docs/VERIFICATION.md) for tests. For coordination across separate frontend, backend, and collection teams, use the [shared agent handoff](docs/AGENT_HANDOFF.md).
+| Research path             | Capabilities                                                                                                                                                                                         |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Research jobs             | Bounded public HN collection, authorized JSON imports, synthetic fixtures, aspect analysis, scope filters, opposing evidence, and decision briefs. ElevenLabs supports text and voice conversations. |
+| Uploaded YouTube comments | Typed questions, explicit product selection, Elasticsearch scope counts, Elastic Agent Builder evidence selection, original citations, and video exclusions.                                         |
 
-## Evidence rules
+The [architecture guide](docs/ARCHITECTURE.md) explains each path, its evidence contract, and current integration boundaries.
 
-Counts cover the full filtered scope, not only displayed examples. Collected records, relevant records, and aspect mentions have different denominators. One record can mention several aspects. Excluding a thread updates both counts and sources. Challenge mode searches for actual opposing sentiment; no opposing example does not prove agreement.
+## Built for review
 
-Live collection is a bounded public HN sample. It does not establish market prevalence or verified customer opinion. Imported sentiment labels can be wrong. Exact quote validation proves that the text exists, not that a model interpretation is correct. Read the full linked source before making a decision.
+- **Counts come from the selected evidence scope.** Displayed examples do not become the denominator.
+- **Quotes remain traceable.** Source-span checks preserve original text and context; they do not establish that an interpretation is true.
+- **Changes have tests.** Synthetic fixtures, Elasticsearch integration tests, and browser regressions cover exclusions, identity, cancellation, product isolation, and late replies.
 
-The repository contains synthetic fixtures. Runtime research, provider receipts, browser recordings, and credentials stay outside Git. [Fixture and source notes](fixtures/README.md) describe collection limits.
+The implementation uses TypeScript, React, Express, SQLite, Elasticsearch, OpenAI, and ElevenLabs. The backend and shared schemas can support another frontend.
+
+[Architecture](docs/ARCHITECTURE.md) · [Hosting](docs/HOSTING.md) · [Engineering setup](docs/SETUP.md) · [Verification](docs/VERIFICATION.md) · [Contributing](CONTRIBUTING.md) · [Integration handoff](docs/AGENT_HANDOFF.md)
