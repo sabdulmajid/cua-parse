@@ -49,6 +49,7 @@ jobs:
       - run: npm test
       - run: npm run test:integration
       - run: npm run build
+      - run: npm run build:showcase
       - run: npm run secret-scan -- --history
       - run: npm run format:check
       - run: npx playwright install --with-deps chromium
@@ -68,3 +69,6 @@ jobs:
           throw new Error('Local API did not become ready');
           JS
           npm run test:browser
+
+      - name: Verify public demo
+        run: npm run test:showcase

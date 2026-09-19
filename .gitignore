@@ -18,3 +18,5 @@ browser-sessions/
 *.key
 docs/screenshots/
 docs/provider-checks/
+
+.site/

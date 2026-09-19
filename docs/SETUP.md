@@ -1,6 +1,36 @@
-# Local configuration
+# Engineering setup
 
-Follow the root README to install the app. `.env.example` lists the settings. Store credentials in an ignored `.env` file. Never use frontend variables for credentials. The app binds to localhost and requires a local HTTP `APP_BASE_URL`.
+This guide runs the working research app. The [public guided sample](https://cua-parse-demo.vercel.app/) is a separate static presentation of synthetic results.
+
+## Install and run
+
+Use Node.js 22.22 or later, npm, and Docker. Elasticsearch needs about 2 GB of memory.
+
+```sh
+git clone https://github.com/sabdulmajid/cua-parse.git
+cd cua-parse
+npm ci
+cp .env.example .env
+docker compose up -d --wait
+npm run setup
+npm run build
+npm start
+```
+
+Open [localhost:3000](http://127.0.0.1:3000). Select **Try demo** for synthetic AcmeFlow feedback. This path uses real SQLite and Elasticsearch and needs no provider keys. Stop Elasticsearch with `docker compose stop` to preserve its data.
+
+For development, use `npm run dev` and open [localhost:5173](http://127.0.0.1:5173). Run one API process per local database. The app supports local use only; publishing the static sample does not expose the research API.
+
+## Configure providers
+
+`.env.example` lists the settings. Store credentials only in the ignored `.env` file. Never use frontend variables for credentials. Restart the API after changes. The app binds to localhost and requires a local HTTP `APP_BASE_URL`.
+
+| Capability                       | Required configuration                                                                         |
+| -------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Synthetic research               | No provider keys. Use **Try demo**.                                                            |
+| ElevenLabs text and voice        | `ELEVENLABS_API_KEY`, `VOICE_MODE=enabled`, and voice setup below.                             |
+| Live or imported feedback labels | `OPENAI_API_KEY` and `ANALYSIS_MODE=openai`. Without these, records remain unlabelled.         |
+| Uploaded YouTube corpus          | The four `ELASTIC_CLOUD_*` settings listed below. This is a separate path for typed questions. |
 
 ## Local evidence store
 

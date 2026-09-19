@@ -5,6 +5,7 @@ export default tseslint.config(
     ignores: [
       "node_modules/**",
       "dist/**",
+      ".site/**",
       ".local/**",
       "test-results/**",
       "playwright-report/**",
@@ -22,7 +23,24 @@ export default tseslint.config(
     },
   },
   {
-    files: ["**/*.{js,cjs}"],
+    files: ["**/*.{js,cjs,mjs}"],
     languageOptions: { globals: { process: "readonly", console: "readonly" } },
+  },
+  {
+    files: ["showcase/**/*.js"],
+    languageOptions: {
+      globals: {
+        document: "readonly",
+        window: "readonly",
+        fetch: "readonly",
+        URL: "readonly",
+        Blob: "readonly",
+        HTMLElement: "readonly",
+        Element: "readonly",
+        requestAnimationFrame: "readonly",
+        setTimeout: "readonly",
+        clearTimeout: "readonly",
+      },
+    },
   },
 );
