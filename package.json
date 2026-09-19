@@ -13,7 +13,7 @@
     "check": "tsc --noEmit && eslint .",
     "format": "prettier --write . --ignore-unknown",
     "format:check": "prettier --check . --ignore-unknown",
-    "test": "vitest run --exclude 'tests/*.integration.test.ts' --exclude 'tests/*.browser.test.ts'",
+    "test": "vitest run --exclude 'tests/*.integration.test.ts' --exclude 'tests/**/*.browser.test.ts'",
     "test:integration": "vitest run tests/*.integration.test.ts",
     "test:browser": "playwright test",
     "setup": "tsx scripts/setup.ts",
@@ -28,7 +28,9 @@
     "smoke:live-analysis": "tsx scripts/live-source-smoke.ts --analyze",
     "smoke:conversation": "tsx scripts/smoke-conversation.ts",
     "smoke:voice": "tsx scripts/smoke-voice.ts",
-    "smoke:live-conversation": "tsx scripts/smoke-live-conversation.ts"
+    "smoke:live-conversation": "tsx scripts/smoke-live-conversation.ts",
+    "build:showcase": "node scripts/build-showcase.mjs",
+    "test:showcase": "playwright test --config playwright.showcase.config.ts"
   },
   "dependencies": {
     "@elastic/elasticsearch": "8.19.1",
