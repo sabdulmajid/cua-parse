@@ -94,7 +94,7 @@ test("synthetic demo → Details → pricing → exclusion → challenge → cit
     if (message.type() === "error") failures.push(message.text());
   });
   const latest = packets(page);
-  await page.goto("/");
+  await page.goto("/research");
   await expect(
     page.getByRole("button", { name: "Try demo", exact: true }),
   ).toBeEnabled();
@@ -237,7 +237,7 @@ test("mobile start stays within the screen and cannot read another session resea
 }) => {
   const ownerBlocked = await preventPaidWork(page);
   const latest = packets(page);
-  await page.goto("/");
+  await page.goto("/research");
   await startDemo(page);
   await expect.poll(() => latest()?.researchId).toBeTruthy();
   const researchId = latest()!.researchId;
@@ -248,7 +248,7 @@ test("mobile start stays within the screen and cannot read another session resea
   try {
     const foreign = await mobile.newPage();
     const foreignBlocked = await preventPaidWork(foreign);
-    await foreign.goto("/");
+    await foreign.goto("/research");
     await expect(
       foreign.getByRole("button", { name: "Try demo", exact: true }),
     ).toBeVisible();
@@ -334,7 +334,7 @@ test("a delayed old response cannot replace new research or add stale findings",
     }
   });
   try {
-    await page.goto("/");
+    await page.goto("/research");
     await startDemo(page);
     await expect.poll(() => held).toBe(true);
     await page
@@ -383,7 +383,7 @@ test("microphone denial occurs before credentials and leaves the independent dem
     const data = await response.json();
     await route.fulfill({ response, json: { ...data, voiceAvailable: true } });
   });
-  await page.goto("/");
+  await page.goto("/research");
   await page.getByRole("button", { name: "Talk", exact: true }).click();
   await expect(page.getByRole("alert")).toContainText(
     "Microphone access was denied",
@@ -423,7 +423,7 @@ test("repeated analysis warnings use one main notice and remain inspectable in D
       },
     });
   });
-  await page.goto("/");
+  await page.goto("/research");
   await startDemo(page);
   await expect.poll(() => latest()?.metrics.relevantRecords).toBe(18);
   const notice = page.locator(".partial-sample-note");
@@ -566,7 +566,7 @@ test("an old job becoming ready cannot supersede a pending new research start", 
     } else await route.fulfill({ json: { packet } });
   });
   try {
-    await page.goto("/");
+    await page.goto("/research");
     await page.getByRole("button", { name: "Try demo", exact: true }).click();
     await expect(page.locator(".research-progress")).toContainText(
       "AcmeFlow · collecting",
@@ -634,7 +634,7 @@ test("a rejected date scope keeps controls editable and recovers on the same job
 }) => {
   const blocked = await preventPaidWork(page);
   const latest = packets(page);
-  await page.goto("/");
+  await page.goto("/research");
   await startDemo(page);
   await expect.poll(() => latest()?.researchId).toBeTruthy();
   const researchId = latest()!.researchId;
@@ -670,7 +670,7 @@ test("a rejected new start clears the previous query state and allows scope reco
 }) => {
   const blocked = await preventPaidWork(page);
   const latest = packets(page);
-  await page.goto("/");
+  await page.goto("/research");
   await startDemo(page);
   await expect.poll(() => latest()?.researchId).toBeTruthy();
   const original = latest()!;
