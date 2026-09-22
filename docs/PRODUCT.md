@@ -1,58 +1,71 @@
-# Case study: when one thread changes the conclusion
+# From feedback to an inspectable decision
 
-CUA Parse helps a product team examine feedback before it becomes a decision. A useful summary needs more than representative quotations. It needs a defined sample, evidence that a reader can inspect, and a way to test how much one discussion affects the result.
+Product feedback arrives in different formats and from different audiences. A summary becomes useful when a team can inspect its originals, see which records it measures, and test whether one discussion dominates the result.
 
-The [guided demo](https://cua-parse-demo.vercel.app/) asks about pricing and onboarding for AcmeFlow, an invented product. It uses synthetic records throughout. The saved responses were exported from the working app's research API. The [walkthrough](https://cua-parse-demo.vercel.app/#walkthrough) shows the working app with the same kind of synthetic research flow.
+The [public workspace](https://cua-parse-demo.vercel.app/) follows the [OverHeard team project's](https://github.com/tyseer2335/OverHeard) product direction. It provides Overview, Pain points, Evidence, and typed Vox search in one browser workspace. Open the synthetic sample or import a local team export. No account, server connection, or provider key is needed for this path.
 
-## The question
+## A usable evidence workflow
 
-“What do people dislike about AcmeFlow, especially its pricing and onboarding?”
+1. **Choose a product.** Review record counts, source coverage, supplied complaint labels, and unknown sentiment.
+2. **Inspect an issue.** Issue rank measures the frequency of supplied labels. Read original records before treating a label as a product problem.
+3. **Change the scope.** Filter by source, sentiment, dates, or text. Exclude a discussion to see whether it drives the result. These controls affect counts, evidence, Vox, and export together.
+4. **Search with Vox.** Ask for an overview, an issue, positive evidence, or specific words. Vox returns deterministic matches and original records. It does not generate new labels or call a model.
+5. **Export the brief.** Save current counts, supplied issue labels, selected originals, source links, and limits. The export recalculates the current scope before it chooses evidence.
 
-The sample contains praise, complaints, mixed aspects, one repeated source identity, ambiguous product references, a missing date, unrelated feedback, and an instruction embedded in source text. One discussion contains eight pricing complaints. This makes it possible to check whether the app handles a difficult sample without a changing external dataset.
+A **scope** is the set of included records. Changing the issue detail view inspects that label; changing a scope filter changes the records measured across the workspace. Missing dates and labels remain explicit. The user can reset filters or restore an excluded discussion without collecting data again.
 
-## What changes when the scope changes
+## Current public sample
 
-**Scope** means the records included in a result. A **mention** means one aspect label on a record. One record can discuss both pricing and onboarding, so mention counts are not the same as record counts.
+The browser sample contains **22 authored records**: 13 for AcmeFlow, an invented collaboration product, and nine for OrbitQuest, an invented game. Source names illustrate different feedback formats. The records were not collected from those platforms, and their source URLs are null.
 
-The guided demo first filters for pricing, then excludes the dominant discussion. The table follows those same two steps.
+For AcmeFlow, the largest discussion contains four records. Excluding it changes the sample as follows:
 
-| Measure                   | Pricing scope | Pricing scope after excluding the dominant discussion |
-| ------------------------- | ------------: | ----------------------------------------------------: |
-| Relevant records          |            13 |                                                     5 |
-| Discussions in scope      |             4 |                                                     3 |
-| Pricing mentions          |            13 |                                                     5 |
-| Negative pricing mentions |             9 |                                                     1 |
-| Positive pricing mentions |             3 |                                                     3 |
-| Neutral pricing mentions  |             1 |                                                     1 |
+| Measure                     | AcmeFlow, all records | After largest-thread exclusion |
+| --------------------------- | --------------------: | -----------------------------: |
+| Records in scope            |                    13 |                              9 |
+| Sources represented         |                     3 |                              3 |
+| Threads in scope            |                     6 |                              5 |
+| Supplied complaint labels   |                     8 |                              5 |
+| Supplied negative sentiment |                     7 |                              5 |
+| Supplied positive sentiment |                     3 |                              2 |
+| Unknown sentiment           |                     1 |                              1 |
 
-The eight negative pricing mentions removed by the exclusion came from one discussion. The original result correctly shows that pricing complaints dominate this sample. The changed result shows that this conclusion depends strongly on one discussion. Neither result establishes how most customers feel.
+These values were calculated from [the browser sample](../src/workspace/sample.ts) with [the scope model](../src/workspace/model.ts). The discussion contains more than one sentiment. Its removal changes both negative and positive counts. Neither view establishes how most customers feel.
 
-These values come from the pricing and exclusion responses in [the exported demo data](../showcase/data/demo.json). The [independent fixture expectations](../fixtures/acmeflow.expected.json) define the pricing counts. The working app calculates metrics from stored evidence. The hosted guided sample displays those exported responses and does not run a new search.
+A record can carry several issue labels. Complaint and sentiment labels also describe different things: a mixed comment may contain a complaint and praise. The app preserves supplied labels instead of turning every issue mention into a negative judgment.
 
-## The research flow
+## Import a team export
 
-1. **Inspect the finding.** Open a citation and read the full synthetic record. The displayed quote must occur in that record.
-2. **Focus on an aspect.** Select pricing. The result now measures pricing evidence, rather than treating every product comment as a pricing opinion.
-3. **Exclude the dominant discussion.** Both the counts and the displayed evidence must change. An example from the excluded discussion cannot remain in the answer.
-4. **Challenge the conclusion.** A negative conclusion calls for positive opposing evidence. The app uses actual records from the current scope. It does not invent an opposing argument.
-5. **Export the brief.** The brief records the current scope, findings, evidence references, and limitations.
+The browser accepts normalized OverHeard feedback and raw collector records in JSON or JSONL. Imports are bounded to 5 MiB and 5,000 rows. Accepted text stays intact. The import report identifies rejected rows, duplicate identities, and removed unsafe links.
 
-The hosted sample offers these prepared steps, citation inspection, and a brief download. It is a guided exploration of saved results. It does not accept arbitrary live research questions or connect a microphone to an agent.
+Files stay in memory in the current tab. They are not uploaded, saved to browser storage, or sent to a provider. Reloading returns to the synthetic sample. Use **Export brief** to keep the current result. Import compatibility does not verify collection history or labels, and it does not connect a live team service.
 
-## Why this is an engineering problem
+## Preserved connected research
 
-A source ID must identify the same record across repeated collection. Equal wording alone is not enough: two distinct comments that say the same thing must remain distinct. Product identity, parent context, source dates, and provenance must survive normalization.
+The local `/research` app remains available for separately configured services. Research jobs support bounded public Hacker News collection, authorized imports, synthetic fixtures, OpenAI aspect analysis, and ElevenLabs text or voice. The job snapshot supports scope changes, opposing evidence, and a brief.
 
-Counts and quotations also need a common scope. Returning a plausible quote from an old request can mislead a reader even when the quote itself is accurate. CUA Parse tracks request and scope versions, rejects conflicting identities, and discards responses that arrive after the user starts different research.
+Uploaded YouTube research is a separate local path. It reads an existing Elasticsearch corpus and uses Elastic Agent Builder with explicit product filters. Its labels remain uploaded metadata. It does not collect YouTube comments or share the job path's voice tools and brief.
 
-The fixture provides a repeatable test of these rules. Live provider checks establish a different fact: whether a provider connection and tool flow completed. The project reports these forms of verification separately. See [Verification](VERIFICATION.md).
+These service paths are not deployed with the public workspace. See [Architecture](ARCHITECTURE.md) and [Setup](SETUP.md) for their contracts and configuration.
 
-## Current limits
+## Archived backend regression example
 
-The research-job path supports bounded public Hacker News collection, authorized imports, and synthetic fixtures. It supports ElevenLabs text and voice, aspect analysis, scope changes, challenge, and brief export. Public discussions are not a representative customer survey. The sample may contain unrelated, historical, ambiguous, or missing evidence.
+The repository retains an older AcmeFlow fixture and its saved API responses to test the connected research backend. It is separate from the current 22-record browser sample. The retired guided page displayed these saved responses; the current workspace calculates its own results from loaded records.
 
-Uploaded YouTube research is a separate path. It reads an existing Elasticsearch corpus, filters the selected product, and uses Elastic Agent Builder to select source passages. Uploaded labels remain unverified metadata. It does not collect YouTube comments, and it is not connected to the research-job voice tools or shared brief.
+The older scenario filters for pricing and then excludes an eight-comment discussion:
 
-Exact quote checks show that a passage exists in the supplied source. They do not prove that a product claim is true. Physical microphone quality still requires a manual check. X and Reddit collection, source-deletion synchronization, and a unified multi-source conversation remain unimplemented. The working backend is intended for local operation; the public guided sample is static.
+| Measure                   | Backend pricing scope | After discussion exclusion |
+| ------------------------- | --------------------: | -------------------------: |
+| Relevant records          |                    13 |                          5 |
+| Discussions in scope      |                     4 |                          3 |
+| Negative pricing mentions |                     9 |                          1 |
+| Positive pricing mentions |                     3 |                          3 |
+| Neutral pricing mentions  |                     1 |                          1 |
 
-See [Architecture](ARCHITECTURE.md) for the current system and [Agent handoff](AGENT_HANDOFF.md) for proposed integration work.
+A mention here is one aspect label, not a whole-comment sentiment. The [independent fixture expectations](../fixtures/acmeflow.expected.json) and [archived API export](../showcase/data/demo.json) define this regression case. These numbers must not be used as current public-workspace counts.
+
+## What the evidence can establish
+
+Exact text checks establish that a quotation occurs in the supplied original. They do not establish that the claim is true. Counts describe a selected dataset, not verified customers or market prevalence. Source engagement is not comparable across platforms. Missing positive evidence does not prove a negative conclusion.
+
+Deterministic tests, service integration checks, and live provider checks establish different facts. See [Verification](VERIFICATION.md) for executed checks and their limits. See [OverHeard alignment](OVERHEARD_ALIGNMENT.md) for team credit and the import boundary.

@@ -46,9 +46,9 @@ The follow-up passed TypeScript/ESLint, 288 unit tests, 21 real local Elasticsea
 
 Independent code review covered backend product isolation, frontend stale-response handling, and the shared handoff. These checks establish this reference implementation's behavior. They do not certify another frontend, X/Reddit collector, a changing live dataset, or physical microphone quality. Read the PR checks for the final pushed revision.
 
-## Public demo release: 19 September 2026
+## Archived public demo release: 19 September 2026
 
-The public showcase adds an independently checked synthetic export and a recorded application flow. The complete local validation passed 304 unit tests, 21 real Elasticsearch integration tests, 18 application browser tests, and 6 public-demo browser tests. TypeScript, ESLint, both builds, formatting, and secret scans passed. The public browser suite checks source inspection, restored scope, opposing evidence, exact brief download, failed-load recovery, non-synthetic data rejection, keyboard/mobile controls, captions, and real video playback.
+The original public showcase added an independently checked synthetic export and a recorded application flow. The complete local validation passed 304 unit tests, 21 real Elasticsearch integration tests, 18 application browser tests, and 6 public-demo browser tests. TypeScript, ESLint, both builds, formatting, and secret scans passed. The public browser suite checks source inspection, restored scope, opposing evidence, exact brief download, failed-load recovery, non-synthetic data rejection, keyboard/mobile controls, captions, and real video playback.
 
 The 59.88-second recording runs the built application against SQLite and Elasticsearch with provider credentials absent. Its four exported states match a fresh data-only API export byte for byte. Public-data tests compare counts and original quotations with the independent fixture. These checks do not claim a hosted live backend or a provider conversation.
 
@@ -63,3 +63,20 @@ SHOWCASE_BASE_URL=https://cua-parse-demo.vercel.app/ npm run test:showcase
 The initial public Vercel release also passed all six browser cases anonymously over HTTPS. Environment and Vercel metadata paths returned HTTP 404. A successful local run alone does not prove that a hosted release is accessible. Record the actual reviewed revision, deployment URL, and hosted test result before reporting publication complete. No live provider conversation is part of this static-site check.
 
 The optional `Publish optional Pages demo` GitHub Pages workflow is disabled unless `ENABLE_GITHUB_PAGES` is exactly `true`. When enabled, it accepts only the selected current `main` revision after a successful `Verify` push or an explicit main-branch recovery dispatch. It does not publish to Vercel. See [HOSTING.md](HOSTING.md) for release and rollback commands, and [DEMO.md](DEMO.md) for reproduction steps.
+
+## Browser workspace revision: 22 September 2026
+
+The public entry is now the Overheard browser workspace. The prior application browser tests target `/research`, which retains the connected backend. The workspace has its own tests under `tests/showcase/` and model tests under `tests/workspace-model.test.ts`.
+
+Local verification passed 322 unit tests, 21 real Elasticsearch integration tests, 18 connected-research browser cases, and eight workspace browser cases. TypeScript, ESLint, both builds, formatting, and working-tree/full-history secret scans passed. Desktop and mobile visual checks found no horizontal overflow. The final public artifact is 2.05 MiB including a 56.56-second recorded walkthrough.
+
+The focused model suite checks both OverHeard export formats, import limits, duplicate reporting, product and organization isolation, strict dates, unknown labels, original quotations, source balance, credential URL removal, scoped search, and export consistency. Browser checks exercise import recovery, filters, source inspection, exclusions, product switching, Vox, pagination, mobile focus, actual downloads, and video playback. Tests use synthetic inputs; no paid provider calls are part of this release.
+
+Build and verify the public entry with:
+
+```sh
+npm run build:showcase
+npm run test:showcase
+```
+
+The compiled artifact rejects backend and provider modules and must fit within 5 MiB. The public Content Security Policy blocks service connections. A deployed check must confirm this header and repeat the browser suite over HTTPS before publication is reported complete. Record final counts and reviewed revision in the release handoff.

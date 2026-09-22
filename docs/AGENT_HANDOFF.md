@@ -1,5 +1,7 @@
 # CUA Parse: shared integration handoff
 
+**Current surface note — 22 September 2026:** the public release is now a browser workspace with a 22-record synthetic sample, local OverHeard JSON/JSONL imports, shared scope filters, issue counts, original evidence, typed deterministic Vox search, and brief export. It needs no backend or provider key. Imports stay in memory. The connected research app described below is preserved at local `/research`; its APIs and proposed integration contract are not the public import contract. See [Architecture](ARCHITECTURE.md), [OverHeard alignment](OVERHEARD_ALIGNMENT.md), and [the browser model](../src/workspace/model.ts) for the current split. Reading the team reference and adding format compatibility do not establish a tested live connection to its services. The earlier review and proposals below remain scoped to connected research.
+
 **Purpose:** give the frontend, backend, and collection engineers one plan for a single working product. Read this common document before porting code. Use the role-specific task briefs near the end for the corresponding agents.
 
 **Review date:** 19 September 2026. **Baseline:** [PR #1](https://github.com/sabdulmajid/cua-parse/pull/1), merged at `86c4224`. The integration-readiness follow-up fixes are described below. Obtain the reviewed follow-up revision before starting new integration branches.
