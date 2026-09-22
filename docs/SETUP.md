@@ -1,8 +1,26 @@
 # Engineering setup
 
-This guide runs the working research app. The [public guided sample](https://cua-parse-demo.vercel.app/) is a separate static presentation of synthetic results.
+The [public browser dashboard](https://cua-parse-demo.vercel.app/) works without a login, database, or provider key. Open its included synthetic sample or import a local OverHeard JSON/JSONL file. Overview, Pain points, Evidence, and typed Vox search share one selected scope. Imports stay in browser memory; they are not uploaded. Reloading clears imported data. The limit is 5 MiB and 5,000 records.
 
-## Install and run
+Vox on this path performs typed retrieval. It does not call an LLM or provide an ElevenLabs voice conversation. Imported sentiment and categories remain supplied labels. Missing labels must not be presented as completed model analysis.
+
+## Develop the browser path
+
+Use Node.js 22.22 or later and npm. Docker and provider configuration are not needed for the static dashboard.
+
+```sh
+npm ci
+npm run build:showcase
+node scripts/serve-showcase.mjs
+```
+
+The preview serves the public artifact under `/cua-parse/`. See [Hosting](HOSTING.md) for release commands and [OverHeard alignment](OVERHEARD_ALIGNMENT.md) for upstream credit and data compatibility.
+
+## Optional local research service
+
+The remaining service instructions are for the preserved CUA Parse research app at `/research`. They are not prerequisites for the public browser dashboard.
+
+### Install and run
 
 Use Node.js 22.22 or later, npm, and Docker. Elasticsearch needs about 2 GB of memory.
 
@@ -17,9 +35,9 @@ npm run build
 npm start
 ```
 
-Open [localhost:3000](http://127.0.0.1:3000). Select **Try demo** for synthetic AcmeFlow feedback. This path uses real SQLite and Elasticsearch and needs no provider keys. Stop Elasticsearch with `docker compose stop` to preserve its data.
+Open [localhost:3000/research](http://127.0.0.1:3000/research). Select **Try demo** for synthetic AcmeFlow feedback. This path uses real SQLite and Elasticsearch and needs no provider keys. Stop Elasticsearch with `docker compose stop` to preserve its data.
 
-For development, use `npm run dev` and open [localhost:5173](http://127.0.0.1:5173). Run one API process per local database. The app supports local use only; publishing the static sample does not expose the research API.
+For development, use `npm run dev` and open [localhost:5173/research](http://127.0.0.1:5173/research). Run one API process per local database. The app supports local use only; publishing the static sample does not expose the research API.
 
 ## Configure providers
 
@@ -61,6 +79,34 @@ Select a product before submitting an uploaded-corpus question. The product cata
 The app reads counts and originals from Elasticsearch, verifies fixed-index ES|QL counts through Agent Builder, then asks the agent to select evidence. The explanation step has tools and Elastic capabilities disabled. The server renders verified source sentences and assigns citations. It does not write to the uploaded index or create remote agents.
 
 Questions have a 150-second provider deadline and no automatic retry. Local limits permit one active request per session, two globally, and 30 per hour. Completed request IDs can replay the same answer for 30 minutes. Model context is limited to 500 complete comments and 100,000 characters; counts still cover the full scope. Ingestion must give each native comment one stable Elasticsearch document ID. The reader rejects duplicate native IDs it observes, but it does not audit uniqueness beyond the retrieved originals. Uploaded labels are metadata, not independently validated opinions.
+
+## Export records from the OverHeard collector without provider keys
+
+This optional command runs in the [team repository at d35ca5b](https://github.com/tyseer2335/OverHeard/tree/d35ca5b), after its Python dependencies are installed. It is not a public-dashboard requirement. It performs bounded network reads from Hacker News and Lemmy, whose adapters do not require an API key. No collection was run as part of this documentation change.
+
+The upstream CLI calls `load_dotenv()`. Merely unsetting a shell key can let a local `.env` load it again. This POSIX wrapper starts with an empty environment apart from executable/module paths and disables dotenv loading before entering the collector. It selects only the two named sources and does not enable planning or proxies:
+
+```sh
+env -i PATH="$PATH" PYTHONPATH=src python - <<'PY'
+import dotenv
+
+dotenv.load_dotenv = lambda *args, **kwargs: False
+from product_voice.collect_cli import main
+
+raise SystemExit(main([
+    "Notion",
+    "--sources", "hackernews,lemmy",
+    "--limit", "50",
+    "--out", "data/notion.jsonl",
+]))
+PY
+```
+
+Run it from the upstream repository root using the Python environment where its base dependencies are installed. The command avoids keyed collectors and model calls; it does not guarantee that a public source is available or that its records may be republished. Respect source access conditions. Keep the output local.
+
+The collector writes raw records and a separate rejects file. Import the records file into the dashboard. Do not import the rejects file as feedback. Review the output before sharing: raw records can include author names, source account IDs in URLs, and arbitrary source text. The dashboard does not convert a successful import into proof of provenance or semantic accuracy.
+
+The upstream no-key analyzer is VADER plus keyword rules. Its fallback leaves relevance unknown. That analysis is separate from raw collection and is not requested by this command. Do not describe an unlabelled import as model-classified feedback.
 
 ## Troubleshooting
 

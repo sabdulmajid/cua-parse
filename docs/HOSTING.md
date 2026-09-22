@@ -1,18 +1,28 @@
-# Public access and full-service hosting
+# Hosting without added paid services
 
-CUA Parse has two publication targets: a public guided demo for immediate access, and the research service for authenticated use. They have separate operating needs.
+The public OverHeard-style dashboard is a static personal project at [cua-parse-demo.vercel.app](https://cua-parse-demo.vercel.app/). Its overview, issue categories, evidence, imports, and typed Vox search run in the browser. The release contains no research API, server functions, provider credentials, database, or private corpus.
 
-## Public guided demo
+The existing hosting account was confirmed active on Vercel Hobby on 22 September 2026. The release procedure does not add a payment method, upgrade the plan, or provision a paid service. Recheck the plan before later releases. Account-specific settings and history belong in private operations notes.
 
-The guided demo contains the research flow, source cards, downloadable brief, and a recording of the working app. The records are explicitly synthetic AcmeFlow feedback. Its four evidence states are exported from the real research API and checked against the fixture oracle. It does not accept arbitrary questions or initiate a live model conversation.
+## Public data and resource limits
 
-The canonical public URL is [cua-parse-demo.vercel.app](https://cua-parse-demo.vercel.app/). For each release, confirm that this production alias serves the reviewed revision before announcing it.
+The build enforces a 5 MiB public artifact budget, including media. It rejects backend and provider modules and does not load environment files. Public response headers disable API connections, camera, microphone, and geolocation access. Local imports are limited to 5 MiB and 5,000 records. File contents stay in browser memory; they are not uploaded to Vercel or a research provider. A reload clears the imported dataset. The included sample is synthetic and must remain labelled as such.
 
-Vercel serves only the reviewed `showcase/` assets assembled into `.site/`. No API, environment file, credential, database, or private corpus is deployed. Releases use the Vercel CLI manually. The static site remains useful when research providers are unavailable.
+As checked on 22 September 2026, Vercel documents these Hobby allowances:
 
-### Release the reviewed main revision
+| Resource           | Included allowance  |
+| ------------------ | ------------------- |
+| Fast Data Transfer | 100 GB per month    |
+| Edge Requests      | 1,000,000 per month |
+| Deployments        | 100 per day         |
 
-Start from the reviewed `main` revision after its `Verify` checks pass. Review the public asset list and confirm that the video and JSON contain synthetic data only. Use the authenticated Vercel account with access to the dedicated `cua-parse-demo` project in `sabdulmajids-projects`.
+Hobby is for personal, non-commercial use. Most exhausted limits require waiting until 30 days have passed before the feature can be used again. It is not an unlimited-availability promise. These limits and the use restriction come from the [official Hobby plan documentation](https://vercel.com/docs/plans/hobby).
+
+If a free allowance is exhausted, allow hosting to pause and use the local static build until service resumes. Do not automatically upgrade, add a card, start a paid fallback, or change providers in response to a quota error. Keep the application usable without an API connection. An unavailable static host cannot display an in-app error before its files load; availability notices must not promise otherwise.
+
+## Manual release
+
+Start from the reviewed `main` revision after verification passes. Inspect the public files and confirm that imported user data is absent. Link only the generated artifact to the existing `cua-parse-demo` project:
 
 ```sh
 npm run build:showcase
@@ -21,49 +31,33 @@ rm -f .site/.env.local
 npm exec --yes --package=vercel@59.23.2 -- vercel deploy --cwd .site --scope sabdulmajids-projects --prod --yes
 ```
 
-The build deletes and recreates `.site/`. **Run the link command again after every rebuild.** Its project metadata stays inside the ignored output directory. This CLI version can also download a short-lived Vercel identity token into `.env.local`; remove that generated file before publication, as shown above. The static demo does not use it. Deploy from `.site/`, not from the repository root. Do not place application configuration or provider credentials in that directory.
+The build replaces `.site/`, so relink after each build. This Vercel CLI version can download an identity token into `.env.local`; remove that generated file before deployment. The static app does not use it. Deploy from `.site/`, not the repository root. Keep generated Vercel project metadata in ignored output storage.
 
-Check the deployment URL returned by Vercel and its production alias. Run the public browser suite against the confirmed alias:
+Confirm that the returned deployment and production alias serve the reviewed revision. Then run the hosted browser checks:
 
 ```sh
 SHOWCASE_BASE_URL=https://cua-parse-demo.vercel.app/ npm run test:showcase
 ```
 
-Keep the trailing slash. The suite checks the guided states, source inspection, brief export, recovery, controls, mobile layout, captions, and video playback. Record the reviewed Git revision and the deployed URL in the release notes. See [demo production](DEMO.md) for reproduction and media checks. Re-record if app behavior or fixture facts change.
+Verify the shared scope, issue and evidence views, typed search, valid and invalid imports, reset/reload behavior, keyboard use, and mobile layout. Confirm that imports and typed questions make no provider or upload requests. Check that environment and deployment metadata paths are not served. Record the release revision and measured results; passing a local test alone does not prove a public release works.
 
-### Preview and optional GitHub Pages
+For rollback, use an existing reviewed Vercel deployment or rebuild and deploy an earlier reviewed static revision. Recheck the production alias after rollback. No backend state needs migration for a static release.
 
-To preview the static artifact for development:
+## Local preview and optional Pages
 
 ```sh
 npm run build:showcase
 node scripts/serve-showcase.mjs
 ```
 
-The preview uses `/cua-parse/` to check relative assets under a repository subpath. `npm run test:showcase` starts an isolated preview server when `SHOWCASE_BASE_URL` is unset. The same assets can be served from the root path on Vercel.
+The preview checks relative assets under `/cua-parse/`. The Vercel site serves the same static artifact from its root. `npm run test:showcase` starts an isolated preview when `SHOWCASE_BASE_URL` is unset.
 
-The `Publish optional Pages demo` GitHub Pages workflow is an optional alternative. It is disabled unless the repository variable `ENABLE_GITHUB_PAGES` is exactly `true`. When enabled, it publishes only the selected current `main` revision after a successful `Verify` push or an explicit main-branch recovery dispatch. PR workflows cannot publish. A revision check prevents a historical rerun from replacing newer `main` content. Action versions are pinned to commit IDs. This workflow does not release to Vercel.
+The `Publish optional Pages demo` workflow remains disabled unless `ENABLE_GITHUB_PAGES` is exactly `true`. If enabled, it publishes only a verified current `main` revision or an explicit reviewed recovery dispatch. Its revision guard prevents an older workflow rerun from replacing newer source. It is separate from the manual Vercel release.
 
-For rollback, use Vercel's rollback operation for an existing reviewed deployment, or rebuild and redeploy a reviewed earlier static revision with the same CLI steps. Verify the production URL again after rollback. The research service and its data are separate from these static releases.
+## Preserved research service
 
-## Full research service: recommended next deployment
+The existing research app remains available at `/research` in local service mode. It uses SQLite, Elasticsearch, and optional external providers. Its API accepts local HTTP origins and is not deployed with this dashboard.
 
-The current API intentionally accepts loopback HTTP origins and binds to `127.0.0.1`. It uses SQLite and an in-process research queue. It is not ready to become an anonymous public API by changing a hostname. No full-backend deployment is included in this publication.
+Keep that service private or local. Supabase, an Elastic subscription, a model key, and a new paid host are not prerequisites for the public browser product. Optional live provider use can have separate charges and needs explicit configuration and authorization. No new full-service deployment is recommended or provisioned by this revision.
 
-A feasible first hosted version is **one paid Render web service with a persistent disk**, managed Elasticsearch, and sign-in restricted to invited users. Keep one process and one instance while SQLite and the in-memory queue remain authoritative. Put SQLite, its WAL files, and app-owned persistent state under the mounted data directory. Keep source collection workers separate from the reader service.
-
-Render's default filesystem is ephemeral. Persistent disks are attached to paid services, are available to one instance, and change deployment/scale behavior. This fits a first single-instance research service. It does not provide horizontal scaling or a high-availability claim. See [persistent disks](https://render.com/docs/disks).
-
-The launch work is concrete:
-
-1. Add an explicit hosted mode with an exact HTTPS origin allowlist, secure cookies, and a configurable listen address. Preserve the existing local mode and its tests.
-2. Require sign-in before creating sessions, jobs, or provider leases. Assign research ownership to an authenticated user. Do not treat an anonymous cookie as a spending entitlement.
-3. Add durable per-user and global provider budgets, concurrency limits, and an operator stop control. Process-memory limits reset on restart and are insufficient as a public spending control.
-4. Provision separate source-reader and evidence-writer Elasticsearch roles. Test the internal mapping against the selected service version. Agent Builder access needs its own checked permissions.
-5. Put secrets in the host's secret store. Retain one stable session secret across restarts. Configure and test the private ElevenLabs agent for the hosted origin and real browser transport.
-6. Verify database backup/restore, index recovery, interrupted jobs, cancellation, source deletion policy, sanitized logs, and provider outages.
-7. Run one bounded signed-in acceptance flow: research → evidence → exclusion → challenge → matching brief. Check text and real microphone behavior separately. Load-test before selecting final memory and concurrency limits.
-
-As of 19 September 2026, Render lists a 512 MB / 0.5 CPU service at **US$7/month** and persistent disks at **US$0.25/GB/month**. Thus a service plus a 1 GB disk starts at **US$7.25/month for those two components only**. This is not the full product cost or a measured sizing recommendation. Add Elasticsearch, model/voice usage, bandwidth, applicable workspace charges, and tax. Verify [current pricing](https://render.com/pricing) before purchasing. No paid infrastructure or subscription is created by this change.
-
-Move to a shared database and durable queue before adding API replicas. The public demo can keep the same URL while the authenticated service is introduced behind a separate explicit entry point.
+Any future public research service needs its own design review for authentication, durable budgets, source access, data retention, recovery, and provider costs. It must not silently change the free browser path. See [Setup](SETUP.md) for the local service and [OverHeard alignment](OVERHEARD_ALIGNMENT.md) for the integration boundary.

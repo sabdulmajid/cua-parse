@@ -1,41 +1,41 @@
 WEBVTT
 
 1
-00:00:00.683 --> 00:00:04.686
-Real CUA Parse app. AcmeFlow is an invented fixture; conversation providers are off.
+00:00:00.305 --> 00:00:06.807
+Overheard turns loaded feedback into issues you can inspect. This is a clearly labeled synthetic sample.
 
 2
-00:00:07.170 --> 00:00:13.172
-1. Research the sample: 21 distinct records, with 18 relevant product matches.
+00:00:06.857 --> 00:00:11.363
+Choose a repeated issue label. The counts come from the full selected scope.
 
 3
-00:00:13.540 --> 00:00:17.542
-Open a citation to inspect its exact synthetic source text.
+00:00:11.422 --> 00:00:16.443
+Read the supporting records, including positive and mixed feedback.
 
 4
-00:00:18.603 --> 00:00:24.607
-2. Focus on pricing: 13 mentions, including 9 negative and 3 positive labels.
+00:00:16.480 --> 00:00:21.482
+Open the full original text. Keep the source context and the supplied labels visible.
 
 5
-00:00:24.679 --> 00:00:28.681
-Eight records come from one concentrated complaint thread.
+00:00:21.593 --> 00:00:25.595
+One discussion contributes four records. Test how much it affects the result.
 
 6
-00:00:29.418 --> 00:00:35.421
-3. Exclude that thread. The remaining pricing scope has 5 records, with only 1 negative label.
+00:00:25.630 --> 00:00:31.132
+Exclude that thread. Counts, issues, search, and exported evidence now use the remaining nine records.
 
 7
-00:00:36.116 --> 00:00:42.118
-4. Challenge the negative conclusion. Three positive pricing records remain in this same scope.
+00:00:31.190 --> 00:00:37.693
+Ask Vox for positive feedback in the current scope. This browser search returns original records without a model call.
 
 8
-00:00:42.718 --> 00:00:48.721
-The opposing quotations are original fixture text, not an invented counterargument.
+00:00:37.766 --> 00:00:41.271
+Export the matching scope, counts, and source quotations as a Markdown brief.
 
 9
-00:00:49.394 --> 00:00:54.394
-5. Export the brief with this scope, its citations, and its sample limits. No external ticket is created.
+00:00:41.332 --> 00:00:47.834
+Bring your team's OverHeard JSON or JSONL export. Files stay in this tab. No account or API key is required.
 
 10
-00:00:54.953 --> 00:00:59.955
-Evidence you can inspect. Conclusions you can challenge. This walkthrough uses synthetic data only.
+00:00:47.873 --> 00:00:52.375
+Switch products without mixing their evidence. Explore the live workspace with your own export.

@@ -147,7 +147,7 @@ async function isolate(page: Page) {
 }
 
 async function chooseElastic(page: Page, waitForCatalog = true) {
-  await page.goto("/");
+  await page.goto("/research");
   await expect(page.getByLabel("Research source", { exact: true })).toHaveValue(
     "live",
   );
@@ -491,7 +491,7 @@ test("persisted Elastic mode exposes a failed session request and recovers witho
     await route.fulfill({ json: answer(input) });
   });
 
-  await page.goto("/");
+  await page.goto("/research");
   await expect(page.getByLabel("Research source", { exact: true })).toHaveValue(
     "elastic",
   );

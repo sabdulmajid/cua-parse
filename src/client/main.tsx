@@ -1,13 +1,21 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import ReactDOM from "react-dom/client";
-import { ConversationProvider } from "@elevenlabs/react";
-import App from "./App";
-import "./styles.css";
+import Workspace from "../workspace/Workspace";
+
+const ResearchRoot = lazy(() => import("./ResearchRoot"));
+const research = /^\/research\/?$/.test(location.pathname);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <ConversationProvider>
-      <App />
-    </ConversationProvider>
+    <Suspense fallback={<p role="status">Opening research…</p>}>
+      {research ? (
+        <ResearchRoot />
+      ) : (
+        <Workspace
+          liveResearchHref="/research"
+          mediaBase={import.meta.env.DEV ? "/showcase/assets/" : "/demo-media/"}
+        />
+      )}
+    </Suspense>
   </React.StrictMode>,
 );

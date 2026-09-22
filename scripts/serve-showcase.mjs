@@ -1,9 +1,14 @@
-import { createReadStream, existsSync, statSync } from "node:fs";
+import { createReadStream, existsSync, statSync, readFileSync } from "node:fs";
 import http from "node:http";
 import { URL } from "node:url";
 import path from "node:path";
 const directory = path.resolve(".site");
 const port = Number(process.env.SHOWCASE_PORT || 3310);
+const publicHeaders = Object.fromEntries(
+  JSON.parse(
+    readFileSync("deployment/vercel.json", "utf8"),
+  ).headers[0].headers.map(({ key, value }) => [key, value]),
+);
 if (!Number.isInteger(port) || port < 1024 || port > 65535)
   throw new Error("Invalid SHOWCASE_PORT.");
 const types = {
@@ -44,6 +49,8 @@ const server = http.createServer((req, res) => {
   const requested = pathname.slice("/cua-parse/".length) || "index.html";
   const file = path.resolve(directory, requested);
   if (
+    requested.split("/").some((segment) => segment.startsWith(".")) ||
+    requested === "vercel.json" ||
     !file.startsWith(directory + path.sep) ||
     !existsSync(file) ||
     !statSync(file).isFile()
@@ -53,6 +60,7 @@ const server = http.createServer((req, res) => {
   }
   const size = statSync(file).size;
   const headers = {
+    ...publicHeaders,
     "Content-Type": types[path.extname(file)] || "application/octet-stream",
     "X-Content-Type-Options": "nosniff",
     "Cache-Control": "no-store",

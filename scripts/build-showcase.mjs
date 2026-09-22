@@ -13,33 +13,22 @@ import { fileURLToPath } from "node:url";
 
 const required = [
   "index.html",
-  "styles.css",
-  "app.js",
-  "render.js",
   "data/demo.json",
   "assets/walkthrough.mp4",
   "assets/poster.webp",
   "assets/captions.vtt",
+  "assets/preview.gif",
+  "favicon.svg",
 ];
-const allowed = new Set([
-  ".html",
-  ".css",
-  ".js",
-  ".json",
-  ".svg",
-  ".webp",
-  ".png",
-  ".jpg",
-  ".mp4",
-  ".gif",
-  ".vtt",
-  ".txt",
-]);
+const allowed = new Set(required);
 
 /** Build only the reviewed public assets. Never copy the application or its runtime files. */
 export function buildShowcase(projectRoot = process.cwd()) {
   const source = path.join(projectRoot, "showcase");
   const output = path.join(projectRoot, ".site");
+  if (existsSync(output) && lstatSync(output).isSymbolicLink())
+    throw new Error("The output directory must not be a link.");
+  rmSync(output, { recursive: true, force: true });
   if (lstatSync(source).isSymbolicLink())
     throw new Error("The showcase directory must not be a link.");
   for (const name of required) {
@@ -57,10 +46,12 @@ export function buildShowcase(projectRoot = process.cwd()) {
       if (stat.isSymbolicLink())
         throw new Error(`Linked public asset is not allowed: ${relative}`);
       if (stat.isDirectory()) {
+        if (!["assets", "data"].includes(relative))
+          throw new Error(`Unexpected public directory: ${relative}`);
         inspect(path.join(directory, name), relative);
         continue;
       }
-      if (!stat.isFile() || !allowed.has(path.extname(name)))
+      if (!stat.isFile() || !allowed.has(relative))
         throw new Error(`Unsupported public asset: ${relative}`);
       if (stat.size > 25 * 1024 * 1024)
         throw new Error(`Public asset exceeds 25 MB: ${relative}`);
@@ -69,9 +60,9 @@ export function buildShowcase(projectRoot = process.cwd()) {
     }
   }
   inspect(source);
-  if (totalBytes > 60 * 1024 * 1024)
+  if (totalBytes > 5 * 1024 * 1024)
     throw new Error(
-      "Public demo exceeds 60 MB. Compress the recording before publication.",
+      "Public demo exceeds 5 MiB. Compress the recording before publication.",
     );
   const data = JSON.parse(
     readFileSync(path.join(source, "data/demo.json"), "utf8"),
@@ -134,7 +125,7 @@ if (
   try {
     const result = buildShowcase();
     console.log(
-      `Built ${result.files.length} public assets (${(result.bytes / 1024 / 1024).toFixed(1)} MB) into .site.`,
+      `Built ${result.files.length} public assets (${(result.bytes / 1024 / 1024).toFixed(1)} MiB) into .site.`,
     );
   } catch (error) {
     console.error(

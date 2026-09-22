@@ -19,13 +19,12 @@ function project() {
   roots.push(root);
   for (const name of [
     "index.html",
-    "styles.css",
-    "app.js",
-    "render.js",
     "data/demo.json",
     "assets/walkthrough.mp4",
     "assets/poster.webp",
     "assets/captions.vtt",
+    "assets/preview.gif",
+    "favicon.svg",
   ]) {
     const file = path.join(root, "showcase", name);
     mkdirSync(path.dirname(file), { recursive: true });
@@ -99,6 +98,24 @@ describe("public artifact boundary", () => {
       JSON.stringify(altered),
     );
     expect(() => build(root)).toThrow();
+  });
+  it("rejects extra data and text files that were not approved for publication", () => {
+    for (const file of ["data/accidental-import.json", "assets/notes.txt"]) {
+      const root = project();
+      writeFileSync(
+        path.join(root, "showcase", file),
+        JSON.stringify({ provenance: "imported", apiKey: "FAKE_SENTINEL" }),
+      );
+      expect(() => build(root)).toThrow();
+      expect(existsSync(path.join(root, ".site"))).toBe(false);
+    }
+  });
+  it("removes stale output when validation fails", () => {
+    const root = project();
+    build(root);
+    writeFileSync(path.join(root, "showcase", "unapproved.json"), "{}");
+    expect(() => build(root)).toThrow();
+    expect(existsSync(path.join(root, ".site"))).toBe(false);
   });
   it("requires the recording and captions before publication", () => {
     const root = project();

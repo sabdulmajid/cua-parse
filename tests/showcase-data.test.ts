@@ -299,13 +299,13 @@ describe("public synthetic research export", () => {
     expect(brief).toContain("Synthetic evidence; no original public URL.");
   });
 
-  it("keeps the public README focused on a clearly labelled guided sample", () => {
+  it("keeps the public README focused on a usable workspace and clear sample provenance", () => {
     const readme = readFileSync(
       new URL("../README.md", import.meta.url),
       "utf8",
     );
-    expect(readme).toContain("synthetic AcmeFlow feedback");
-    expect(readme).toMatch(/\[.*guided demo.*\]\(https:\/\//i);
+    expect(readme).toMatch(/synthetic/i);
+    expect(readme).toMatch(/\[.*workspace.*\]\(https:\/\//i);
     expect(readme).not.toMatch(
       /\btrial\b|localhost|docker compose|\bnpm\s|```(?:sh|bash|shell)/i,
     );

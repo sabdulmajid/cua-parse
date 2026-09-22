@@ -1,38 +1,42 @@
-# CUA Parse
+# Overheard
 
 [![Verification](https://github.com/sabdulmajid/cua-parse/actions/workflows/ci.yml/badge.svg)](https://github.com/sabdulmajid/cua-parse/actions/workflows/ci.yml)
 
-**Turn scattered product feedback into findings you can inspect.**
+**Listen closer. Build better.**
 
-One large complaint thread can dominate a product summary. CUA Parse connects each finding to original feedback, shows how much evidence supports it, and lets you remove that thread to see what changes.
+Turn scattered product feedback into a clear view of the issues behind it. Compare sources, inspect the original words, ask a question, and export a brief that keeps its evidence.
 
-[**Explore the guided demo →**](https://cua-parse-demo.vercel.app/) · [Watch the 60-second walkthrough](https://cua-parse-demo.vercel.app/#walkthrough)
+[**Open the workspace →**](https://cua-parse-demo.vercel.app/) · [Watch the walkthrough](https://cua-parse-demo.vercel.app/#walkthrough) · [How it works](docs/OVERHEARD_ALIGNMENT.md)
 
-[![CUA Parse research workspace: inspect feedback, change scope, and check the sources](showcase/assets/preview.gif)](https://cua-parse-demo.vercel.app/)
+[![Overheard product feedback workspace: ranked issues, source breakdowns, and original evidence](showcase/assets/preview.gif)](https://cua-parse-demo.vercel.app/)
 
-The guided sample uses **synthetic AcmeFlow feedback**. Its saved results come from the working research app. The walkthrough records that app; the hosted sample lets you explore those results without a live provider connection.
+The workspace opens immediately. Explore the clearly labelled synthetic sample, or import your own **OverHeard JSON or JSONL export**. Imported records stay in the current browser tab. No account or API key is required.
 
-## Follow the evidence
+## From feedback to a decision
 
-Ask about pricing and onboarding. Open a citation. Exclude the largest complaint thread. Check whether the remaining feedback changes the conclusion. Then challenge it with actual opposing evidence and export the current brief.
+1. **Choose a product.** See feedback volume, known sentiment, and each source’s share.
+2. **Inspect a pain point.** Open the original records behind a ranked issue. Missing labels stay unknown.
+3. **Test the scope.** Filter by source, date, sentiment, or text. Exclude a thread and see what changes.
+4. **Ask Vox.** Search the selected evidence with a typed question. Answers show their source records and limits.
+5. **Export the brief.** Take the same scope, counts, and citations into a product discussion.
 
-The sample makes the effect visible: negative pricing mentions fall from **9 of 13** to **1 of 5** after one discussion is excluded. These are facts about the invented sample, not customer research results. [Read the case study](docs/PRODUCT.md).
+Vox in the public workspace uses deterministic evidence search. It does not generate new sentiment labels or pretend that saved text is a live model answer. Your selected scope drives the dashboard, evidence list, answers, and brief.
 
-## What the working app supports
+## Evidence first
 
-| Research path             | Capabilities                                                                                                                                                                                         |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Research jobs             | Bounded public HN collection, authorized JSON imports, synthetic fixtures, aspect analysis, scope filters, opposing evidence, and decision briefs. ElevenLabs supports text and voice conversations. |
-| Uploaded YouTube comments | Typed questions, explicit product selection, Elasticsearch scope counts, Elastic Agent Builder evidence selection, original citations, and video exclusions.                                         |
+- **Comparable views.** Source counts stay visible. Selected search and brief examples are balanced across sources. Unrelated engagement scores are not combined into a ranking.
+- **Traceable statements.** Quotes preserve the imported text. Public source links are available when supplied without embedded credentials.
+- **Honest gaps.** Unknown sentiment, missing dates, invalid rows, and off-topic records are reported. Sample data is never described as collected customer feedback.
+- **A bounded free workspace.** The public app runs in the browser with no backend or paid provider calls. Imports are limited to 5 MiB and 5,000 rows. [Operation and limits](docs/HOSTING.md).
 
-The [architecture guide](docs/ARCHITECTURE.md) explains each path, its evidence contract, and current integration boundaries.
+## Connected research
 
-## Built for review
+The repository also retains the research backend: Elasticsearch retrieval, Elastic Agent Builder over an uploaded corpus, bounded collection and imports, and ElevenLabs text and voice integration. These features use separately configured services. They are documented in the [architecture](docs/ARCHITECTURE.md) and [engineering setup](docs/SETUP.md) guides.
 
-- **Counts come from the selected evidence scope.** Displayed examples do not become the denominator.
-- **Quotes remain traceable.** Source-span checks preserve original text and context; they do not establish that an interpretation is true.
-- **Changes have tests.** Synthetic fixtures, Elasticsearch integration tests, and browser regressions cover exclusions, identity, cancellation, product isolation, and late replies.
+## Built with the team’s finished product in view
 
-The implementation uses TypeScript, React, Express, SQLite, Elasticsearch, OpenAI, and ElevenLabs. The backend and shared schemas can support another frontend.
+This workspace follows the product direction of [the OverHeard team project](https://github.com/tyseer2335/OverHeard): product-level analytics, ranked issues, source evidence, and Vox. Its browser import adapter accepts that project’s normalized feedback and raw collector exports. The implementation keeps the public experience independent of hosted authentication and provider accounts. [Alignment, attribution, and integration boundaries](docs/OVERHEARD_ALIGNMENT.md).
 
-[Architecture](docs/ARCHITECTURE.md) · [Hosting](docs/HOSTING.md) · [Engineering setup](docs/SETUP.md) · [Verification](docs/VERIFICATION.md) · [Contributing](CONTRIBUTING.md) · [Integration handoff](docs/AGENT_HANDOFF.md)
+TypeScript · React · Vite · Elasticsearch · SQLite · Elastic Agent Builder · ElevenLabs
+
+[Architecture](docs/ARCHITECTURE.md) · [Verification](docs/VERIFICATION.md) · [Contributing](CONTRIBUTING.md) · [Media provenance](docs/DEMO.md) · [Integration handoff](docs/AGENT_HANDOFF.md)
