@@ -22,7 +22,7 @@ import type {
 } from "../src/shared/contracts.js";
 
 const root = process.cwd();
-const assets = path.join(root, "showcase/assets");
+const assets = path.join(root, ".local/legacy-demo-assets");
 const local = path.join(root, ".local/showcase");
 const output = path.join(root, "showcase/data/demo.json");
 const origin = "http://127.0.0.1:3300";
@@ -312,7 +312,7 @@ try {
       if (response.url().endsWith("/api/tools/query_feedback") && response.ok())
         latest = (await response.json()).packet;
     });
-    await page.goto(origin, { waitUntil: "networkidle" });
+    await page.goto(`${origin}/research`, { waitUntil: "networkidle" });
     await expect(
       page.getByRole("button", { name: "Try demo", exact: true }),
     ).toBeEnabled();

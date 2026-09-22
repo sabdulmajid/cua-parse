@@ -2,338 +2,35 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#183d34" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#111511" />
     <meta
       name="description"
-      content="Explore CUA Parse: product research with inspectable sources, scope controls, and opposing evidence. Try the guided AcmeFlow sample."
+      content="Overheard: explore product feedback, inspect ranked issues, compare sources, and ask questions grounded in your evidence. Open the workspace or import an export. No sign-up required."
     />
     <meta
       property="og:title"
-      content="CUA Parse — Product research you can inspect"
+      content="Overheard · Listen closer. Build better."
     />
     <meta
       property="og:description"
-      content="Follow a question from feedback to findings. Change the scope, challenge the conclusion, and inspect the sources."
+      content="A working product feedback workspace. Explore evidence, filter sources, and export a brief. Your imports stay on your device."
     />
     <meta property="og:type" content="website" />
     <meta
       property="og:image"
       content="https://cua-parse-demo.vercel.app/assets/poster.webp"
     />
-    <meta
-      property="og:image:alt"
-      content="CUA Parse research workspace with cited findings from the synthetic AcmeFlow sample"
-    />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta
-      name="twitter:title"
-      content="CUA Parse — Product research you can inspect"
-    />
-    <meta
-      name="twitter:description"
-      content="Follow a question from feedback to findings. Change the scope, challenge the conclusion, and inspect the sources."
-    />
     <meta
       name="twitter:image"
       content="https://cua-parse-demo.vercel.app/assets/poster.webp"
     />
-    <title>CUA Parse — Product research you can inspect</title>
-    <link rel="stylesheet" href="./styles.css" />
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
-    <script type="module" src="./app.js"></script>
+    <title>Overheard · Product feedback workspace</title>
   </head>
   <body>
-    <a class="skip-link" href="#main">Skip to content</a>
-    <header class="site-header page-width">
-      <a class="brand" href="#" aria-label="CUA Parse home">
-        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
-          <rect x="1" y="1" width="30" height="30" rx="8" fill="currentColor" />
-          <path
-            d="M9 10h14M9 16h9M9 22h5"
-            stroke="#fff"
-            stroke-width="2"
-            stroke-linecap="round"
-          />
-          <path
-            d="m20 20 2 2 4-5"
-            fill="none"
-            stroke="#b4e5bd"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-        <span>CUA <strong>Parse</strong></span>
-      </a>
-      <nav aria-label="Main navigation">
-        <a href="#walkthrough">Walkthrough</a>
-        <a class="code-link" href="https://github.com/sabdulmajid/cua-parse"
-          >View code <span aria-hidden="true">↗</span></a
-        >
-      </nav>
-    </header>
-    <main id="main">
-      <section class="hero page-width" aria-labelledby="hero-title">
-        <p class="eyebrow">
-          <span class="small-line" aria-hidden="true"></span>FROM FEEDBACK TO
-          FINDINGS
-        </p>
-        <h1 id="hero-title">Product research<br />you can <em>inspect.</em></h1>
-        <p class="hero-description">
-          An answer is a starting point. See its sources, change its scope, and
-          find the evidence that points the other way.
-        </p>
-        <div class="hero-actions">
-          <a class="button primary" href="#sample"
-            >Explore the sample <span aria-hidden="true">↓</span></a
-          >
-          <a class="watch-link" href="#walkthrough"
-            ><span class="play-icon" aria-hidden="true">▶</span> Watch the
-            working app</a
-          >
-        </div>
-      </section>
-
-      <section
-        class="sample-section page-width"
-        id="sample"
-        aria-labelledby="sample-title"
-      >
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">TRY IT YOURSELF</p>
-            <h2 id="sample-title">Does one thread change the story?</h2>
-          </div>
-          <p>A guided research question.<br />Every finding has a source.</p>
-        </div>
-        <div class="sample-window">
-          <div class="sample-toolbar">
-            <span class="sample-label"
-              ><span aria-hidden="true">◈</span> Interactive sample · synthetic
-              AcmeFlow data</span
-            >
-            <button class="text-button" id="restart" type="button" hidden>
-              Start again <span aria-hidden="true">↺</span>
-            </button>
-          </div>
-          <div id="sample-loading" class="sample-loading" role="status">
-            Loading sample…
-          </div>
-          <div id="sample-error" class="sample-error" role="alert" hidden>
-            <p>The sample could not load.</p>
-            <button id="retry-sample" class="button secondary" type="button">
-              Reload sample
-            </button>
-          </div>
-          <div id="sample-content" hidden>
-            <div class="question-row">
-              <span class="question-mark" aria-hidden="true">Q</span>
-              <div>
-                <span class="field-label">RESEARCH QUESTION</span>
-                <p id="research-question"></p>
-              </div>
-            </div>
-            <div id="sample-intro" class="sample-intro">
-              <div class="intro-rule" aria-hidden="true">
-                <span>Question</span><i></i><span>Evidence</span><i></i
-                ><span>Decision</span>
-              </div>
-              <p>
-                Start with the feedback. Then test how much the conclusion
-                depends on one discussion.
-              </p>
-              <button id="show-findings" class="button primary" type="button">
-                Show findings <span aria-hidden="true">→</span>
-              </button>
-            </div>
-            <div id="research-results" hidden>
-              <nav class="step-navigation" aria-label="Sample steps">
-                <button data-step="overview" type="button">
-                  <span>1</span>Findings
-                </button>
-                <button data-step="pricing" type="button">
-                  <span>2</span>Pricing
-                </button>
-                <button data-step="excluded" type="button">
-                  <span>3</span>Scope
-                </button>
-                <button data-step="challenge" type="button">
-                  <span>4</span>Challenge
-                </button>
-              </nav>
-              <div class="answer-content">
-                <div class="answer-heading">
-                  <p class="eyebrow" id="answer-kicker"></p>
-                  <span class="scope-tag" id="scope-tag"></span>
-                </div>
-                <h3 id="answer-title" tabindex="-1"></h3>
-                <p class="answer-summary" id="answer-summary"></p>
-                <div
-                  class="sample-metrics"
-                  id="sample-metrics"
-                  aria-label="Current evidence counts"
-                ></div>
-                <ol
-                  class="findings"
-                  id="findings"
-                  aria-label="Findings and sources"
-                ></ol>
-                <button
-                  type="button"
-                  class="text-button inspect-button"
-                  id="inspect-sources"
-                >
-                  Inspect source feedback <span aria-hidden="true">↗</span>
-                </button>
-                <div
-                  class="scope-comparison"
-                  id="scope-comparison"
-                  hidden
-                ></div>
-                <div class="next-action">
-                  <div>
-                    <strong id="next-title"></strong>
-                    <p id="next-description"></p>
-                  </div>
-                  <button
-                    class="button primary"
-                    id="next-step"
-                    type="button"
-                  ></button>
-                </div>
-                <p class="sample-limit">
-                  This sample describes synthetic feedback, not real customers
-                  or market demand.
-                  <button
-                    type="button"
-                    class="inline-button"
-                    id="sample-details"
-                  >
-                    About the evidence
-                  </button>
-                </p>
-              </div>
-            </div>
-          </div>
-          <noscript
-            ><p class="sample-loading">
-              Enable JavaScript to explore the sample. You can also watch the
-              recording below.
-            </p></noscript
-          >
-        </div>
-        <p class="sample-footnote">
-          These are saved outputs from the research application. Your choices
-          switch between the corresponding evidence scopes.
-        </p>
-      </section>
-
-      <section
-        class="principles page-width"
-        aria-label="What the research flow supports"
-      >
-        <article>
-          <span class="principle-number">01 / INSPECT</span>
-          <h3>Follow a claim to its source.</h3>
-          <p>
-            Read the feedback behind a finding. Keep the original words and
-            their context in view.
-          </p>
-        </article>
-        <article>
-          <span class="principle-number">02 / CHANGE SCOPE</span>
-          <h3>Check what drives the result.</h3>
-          <p>
-            A busy thread can dominate a sample. Exclude it and compare the
-            counts and findings.
-          </p>
-        </article>
-        <article>
-          <span class="principle-number">03 / CHALLENGE</span>
-          <h3>Look for opposing evidence.</h3>
-          <p>
-            Test a negative conclusion against positive feedback. Carry the
-            evidence into a decision brief.
-          </p>
-        </article>
-      </section>
-
-      <section
-        class="walkthrough-section page-width"
-        id="walkthrough"
-        aria-labelledby="walkthrough-title"
-      >
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">THE WORKING APPLICATION</p>
-            <h2 id="walkthrough-title">See the research flow in action.</h2>
-          </div>
-          <p>A recorded walkthrough of the<br />same synthetic sample.</p>
-        </div>
-        <div class="video-frame">
-          <video
-            controls
-            playsinline
-            preload="metadata"
-            poster="./assets/poster.webp"
-            aria-label="CUA Parse working application walkthrough"
-          >
-            <source src="./assets/walkthrough.mp4" type="video/mp4" />
-            <track
-              kind="captions"
-              src="./assets/captions.vtt"
-              srclang="en"
-              label="English"
-              default
-            />
-            Your browser does not support this video.
-            <a href="./assets/walkthrough.mp4">Download the walkthrough</a>.
-          </video>
-        </div>
-        <p class="video-caption">
-          Research question → source inspection → thread exclusion → opposing
-          evidence → decision brief.
-        </p>
-      </section>
-
-      <section class="code-section page-width" aria-labelledby="code-title">
-        <div>
-          <p class="eyebrow">OPEN IMPLEMENTATION</p>
-          <h2 id="code-title">The evidence continues in the code.</h2>
-          <p>
-            Explore the application, its evidence rules, and the tests behind
-            the research flow.
-          </p>
-        </div>
-        <a
-          class="button secondary"
-          href="https://github.com/sabdulmajid/cua-parse"
-          >Explore the repository <span aria-hidden="true">↗</span></a
-        >
-      </section>
-    </main>
-    <footer class="site-footer page-width">
-      <span>CUA Parse</span><span>Questions. Sources. Decisions.</span
-      ><a href="#main">Back to top ↑</a>
-    </footer>
-    <dialog id="source-dialog" aria-labelledby="source-dialog-title">
-      <div class="dialog-heading">
-        <div>
-          <p class="eyebrow">SYNTHETIC ACMEFLOW DATA</p>
-          <h2 id="source-dialog-title">Source feedback</h2>
-        </div>
-        <button
-          id="close-sources"
-          class="close-button"
-          type="button"
-          aria-label="Close source feedback"
-        >
-          ×
-        </button>
-      </div>
-      <div id="source-dialog-content"></div>
-    </dialog>
-    <p class="sr-only" id="announcement" role="status" aria-live="polite"></p>
+    <div id="root"></div>
+    <script type="module" src="../src/workspace/entry.tsx"></script>
   </body>
 </html>

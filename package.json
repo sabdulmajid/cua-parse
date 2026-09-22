@@ -29,7 +29,7 @@
     "smoke:conversation": "tsx scripts/smoke-conversation.ts",
     "smoke:voice": "tsx scripts/smoke-voice.ts",
     "smoke:live-conversation": "tsx scripts/smoke-live-conversation.ts",
-    "build:showcase": "node scripts/build-showcase.mjs",
+    "build:showcase": "node scripts/build-workspace.mjs",
     "test:showcase": "playwright test --config playwright.showcase.config.ts"
   },
   "dependencies": {
